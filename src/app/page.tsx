@@ -50,10 +50,10 @@ export default function Home() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Runtime Theming</CardTitle>
+                        <CardTitle>All Tokens</CardTitle>
                         <CardDescription>
                             Open DevTools and change CSS variables on :root to see the theme update
-                            live. Try setting --primary to a different oklch value.
+                            live.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -67,16 +67,32 @@ export default function Home() {
                                 <span className="text-xs text-muted-foreground">secondary</span>
                             </div>
                             <div className="flex flex-col items-center gap-1">
-                                <div className="size-10 rounded-lg bg-accent" />
+                                <div className="size-10 rounded-lg border border-border bg-accent" />
                                 <span className="text-xs text-muted-foreground">accent</span>
                             </div>
                             <div className="flex flex-col items-center gap-1">
-                                <div className="size-10 rounded-lg bg-muted" />
+                                <div className="size-10 rounded-lg border border-border bg-muted" />
                                 <span className="text-xs text-muted-foreground">muted</span>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="size-10 rounded-lg bg-destructive" />
                                 <span className="text-xs text-muted-foreground">destructive</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-success" />
+                                <span className="text-xs text-muted-foreground">success</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-warning" />
+                                <span className="text-xs text-muted-foreground">warning</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border border-border bg-card" />
+                                <span className="text-xs text-muted-foreground">card</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border-2 border-border" />
+                                <span className="text-xs text-muted-foreground">border</span>
                             </div>
                         </div>
                     </CardContent>
