@@ -1,10 +1,19 @@
 import { supabase } from './supabase'
 
 export const signInWithGoogle = async (redirectTo?: string) => {
+    const target = redirectTo ?? `${window.location.origin}/`
+
+    if (typeof window !== 'undefined') {
+        const origin = window.location.origin
+        if (!target.startsWith(origin)) {
+            throw new Error('redirectTo must be a same-origin URL')
+        }
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: redirectTo || `${window.location.origin}/`,
+            redirectTo: target,
             queryParams: {
                 access_type: 'offline',
                 prompt: 'select_account',
@@ -25,7 +34,13 @@ export const getSession = async () => {
     return data.session
 }
 
+export const getUser = async () => {
+    const { data, error } = await supabase.auth.getUser()
+    if (error) throw error
+    return data.user
+}
+
 export const getAccessToken = async (): Promise<string | null> => {
     const session = await getSession()
-    return session?.access_token || null
+    return session?.access_token ?? null
 }
