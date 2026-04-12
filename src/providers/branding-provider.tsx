@@ -1,10 +1,11 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { resolveHostname } from '../lib/branding-service'
-import { applyBranding, resetBranding } from '../lib/apply-branding'
-import { getCurrentHostname } from '../lib/hostname'
-import type { ResolvedWebsiteContext } from '../types/branding'
+import { resolveHostname } from '@/lib/branding-service'
+import { applyBranding, resetBranding } from '@/lib/apply-branding'
+import { getCurrentHostname } from '@/lib/hostname'
+import { FullScreenLoader } from '@/components/full-screen-loader'
+import type { ResolvedWebsiteContext } from '@/types/branding'
 
 interface BrandingContextValue {
     website: ResolvedWebsiteContext | null
@@ -72,11 +73,7 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
     }, [hostname])
 
     if (state.isLoading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-background">
-                <div className="size-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            </div>
-        )
+        return <FullScreenLoader />
     }
 
     return (
