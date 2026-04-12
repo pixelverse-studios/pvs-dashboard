@@ -12,12 +12,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+} from '@/components/ui/sheet'
 import { useAuth } from '@/providers/auth-provider'
 import { signOut } from '@/lib/auth-service'
 import { SidebarContent } from './dashboard-sidebar'
 
 const getInitials = (email: string) => {
+    if (!email) return '?'
     return email.slice(0, 2).toUpperCase()
 }
 
@@ -29,19 +34,26 @@ export const DashboardTopbar = () => {
     return (
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
             <div className="flex items-center gap-2">
-                <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                <Sheet
+                    open={sheetOpen}
+                    onOpenChange={setSheetOpen}
+                >
                     <SheetTrigger
                         render={
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="md:hidden"
+                                aria-label="Open menu"
                             />
                         }
                     >
                         <Menu className="size-5" />
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-64 p-0">
+                    <SheetContent
+                        side="left"
+                        className="w-64 p-0"
+                    >
                         <SidebarContent />
                     </SheetContent>
                 </Sheet>
@@ -50,7 +62,10 @@ export const DashboardTopbar = () => {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     render={
-                        <Button variant="ghost" className="gap-2 px-2" />
+                        <Button
+                            variant="ghost"
+                            className="gap-2 px-2"
+                        />
                     }
                 >
                     <Avatar className="size-7">

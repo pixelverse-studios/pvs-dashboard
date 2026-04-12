@@ -3,7 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { FileText, LayoutTemplate, Users, Settings } from 'lucide-react'
+import {
+    FileText,
+    LayoutTemplate,
+    Users,
+    Settings,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/auth-provider'
 import { useBranding } from '@/providers/branding-provider'
@@ -17,27 +22,53 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { label: 'Pages', href: '/pages', icon: FileText },
-    { label: 'Templates', href: '/templates', icon: LayoutTemplate, adminOnly: true },
-    { label: 'Users', href: '/users', icon: Users, adminOnly: true },
+    {
+        label: 'Templates',
+        href: '/templates',
+        icon: LayoutTemplate,
+        adminOnly: true,
+    },
+    {
+        label: 'Users',
+        href: '/users',
+        icon: Users,
+        adminOnly: true,
+    },
     { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
-const getClientName = (website: ReturnType<typeof useBranding>['website']) => {
+const getClientName = (
+    website: ReturnType<typeof useBranding>['website'],
+) => {
     if (!website) return 'CMS Dashboard'
     const { client, website_title } = website
     return (
         client.company_name ||
-        [client.firstname, client.lastname].filter(Boolean).join(' ') ||
+        [client.firstname, client.lastname]
+            .filter(Boolean)
+            .join(' ') ||
         website_title ||
         'CMS Dashboard'
     )
 }
+
+const isValidLogoUrl = (url: string) => {
+    try {
+        return new URL(url).protocol === 'https:'
+    } catch {
+        return false
+    }
+}
+
+const isNavActive = (pathname: string, href: string) =>
+    pathname === href || pathname.startsWith(href + '/')
 
 export const SidebarContent = () => {
     const pathname = usePathname()
     const { isPvsAdmin } = useAuth()
     const { website } = useBranding()
     const clientName = getClientName(website)
+    const logoUrl = website?.branding?.logo_url
 
     const visibleItems = navItems.filter(
         (item) => !item.adminOnly || isPvsAdmin,
@@ -46,9 +77,10 @@ export const SidebarContent = () => {
     return (
         <div className="flex h-full flex-col">
             <div className="flex items-center gap-3 border-b border-border px-4 py-5">
-                {website?.branding?.logo_url ? (
+                {logoUrl && isValidLogoUrl(logoUrl) ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                        src={website.branding.logo_url}
+                        src={logoUrl}
                         alt={clientName}
                         className="h-8 w-auto max-w-[160px] object-contain"
                     />
@@ -65,16 +97,20 @@ export const SidebarContent = () => {
 
             <nav className="flex-1 space-y-1 px-3 py-4">
                 {visibleItems.map((item) => {
-                    const isActive = pathname.startsWith(item.href)
+                    const active = isNavActive(pathname, item.href)
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                                isActive
+                                'flex items-center gap-3 rounded-lg',
+                                'px-3 py-2 text-sm font-medium',
+                                'transition-colors',
+                                active
                                     ? 'bg-accent text-accent-foreground'
-                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                                    : 'text-muted-foreground',
+                                !active &&
+                                    'hover:bg-muted hover:text-foreground',
                             )}
                         >
                             <item.icon className="size-4" />
@@ -84,7 +120,7 @@ export const SidebarContent = () => {
                 })}
             </nav>
 
-            {!website?.branding?.logo_url && (
+            {!(logoUrl && isValidLogoUrl(logoUrl)) && (
                 <div className="border-t border-border px-4 py-3">
                     <p className="text-xs text-muted-foreground">
                         Powered by PixelVerse Studios
