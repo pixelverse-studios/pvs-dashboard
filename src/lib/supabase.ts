@@ -1,5 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
-import { env } from './env'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { env } from '@/lib/env'
+
+const globalForSupabase = globalThis as unknown as {
+    __supabase?: SupabaseClient
+}
 
 const createSupabaseClient = () =>
     createClient(env.supabaseUrl, env.supabaseAnonKey, {
@@ -10,10 +14,9 @@ const createSupabaseClient = () =>
         },
     })
 
-// Prevent duplicate instances during Next.js HMR
-const globalForSupabase = globalThis as unknown as {
-    __supabase?: ReturnType<typeof createSupabaseClient>
+export const getSupabase = (): SupabaseClient => {
+    if (!globalForSupabase.__supabase) {
+        globalForSupabase.__supabase = createSupabaseClient()
+    }
+    return globalForSupabase.__supabase
 }
-
-export const supabase =
-    globalForSupabase.__supabase ?? (globalForSupabase.__supabase = createSupabaseClient())

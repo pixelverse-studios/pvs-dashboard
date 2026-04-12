@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Geist_Mono } from 'next/font/google'
+import { QueryProvider } from '@/providers/query-provider'
 import { BrandingProvider } from '@/providers/branding-provider'
+import { AuthProvider } from '@/providers/auth-provider'
 import './globals.css'
 
 const inter = Inter({
@@ -29,7 +31,11 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
             <body className="min-h-screen bg-background font-sans antialiased">
-                <BrandingProvider>{children}</BrandingProvider>
+                <QueryProvider>
+                    <BrandingProvider>
+                        <AuthProvider>{children}</AuthProvider>
+                    </BrandingProvider>
+                </QueryProvider>
             </body>
         </html>
     )
