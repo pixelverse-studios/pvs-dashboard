@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Geist_Mono } from 'next/font/google'
+import { BrandingProvider } from '@/providers/branding-provider'
 import './globals.css'
 
 const inter = Inter({
@@ -27,7 +28,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
-            <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+            <body className="min-h-screen bg-background font-sans antialiased">
+                <BrandingProvider>{children}</BrandingProvider>
+            </body>
         </html>
     )
 }
