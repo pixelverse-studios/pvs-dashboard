@@ -3,7 +3,7 @@ const required = (key: string): string => {
     if (!value || !value.trim()) {
         throw new Error(`Missing required environment variable: ${key}`)
     }
-    return value
+    return value.trim()
 }
 
 export const env = {

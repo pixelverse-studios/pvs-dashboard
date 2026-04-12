@@ -3,6 +3,7 @@ import { env } from './env'
 
 type TokenGetter = () => Promise<string | null>
 
+// Call once at app init (e.g., from the auth provider). Not safe to swap mid-request.
 let getToken: TokenGetter = async () => null
 
 export const setTokenGetter = (getter: TokenGetter) => {
@@ -13,6 +14,22 @@ interface FetchOptions {
     auth?: boolean
     headers?: Record<string, string>
     signal?: AbortSignal
+}
+
+const parseResponse = async (response: Response): Promise<unknown> => {
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+        return response.text()
+    }
+    try {
+        return await response.json()
+    } catch {
+        throw new ApiError(
+            response.status,
+            null,
+            `Invalid JSON in response from ${response.url}`,
+        )
+    }
 }
 
 const fetchApi = async <T>(
@@ -45,10 +62,7 @@ const fetchApi = async <T>(
         signal: options.signal,
     })
 
-    const contentType = response.headers.get('content-type') || ''
-    const parsed = contentType.includes('application/json')
-        ? await response.json()
-        : await response.text()
+    const parsed = await parseResponse(response)
 
     if (!response.ok) {
         throw new ApiError(response.status, parsed)
