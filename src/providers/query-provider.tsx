@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState, type ReactNode } from 'react'
-import { ApiError } from '../lib/api-error'
+import { ApiError } from '@/lib/api-error'
 
 export const QueryProvider = ({ children }: { children: ReactNode }) => {
     const [client] = useState(
@@ -15,7 +15,11 @@ export const QueryProvider = ({ children }: { children: ReactNode }) => {
                         gcTime: 5 * 60_000,
                         refetchOnWindowFocus: false,
                         retry: (failureCount, error) => {
-                            if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+                            if (
+                                error instanceof ApiError &&
+                                error.status >= 400 &&
+                                error.status < 500
+                            ) {
                                 return false
                             }
                             return failureCount < 2
@@ -28,7 +32,9 @@ export const QueryProvider = ({ children }: { children: ReactNode }) => {
     return (
         <QueryClientProvider client={client}>
             {children}
-            {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
+            {process.env.NODE_ENV === 'development' && (
+                <ReactQueryDevtools />
+            )}
         </QueryClientProvider>
     )
 }

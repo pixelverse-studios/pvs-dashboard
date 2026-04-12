@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { env } from './env'
+import { env } from '@/lib/env'
 
 const globalForSupabase = globalThis as unknown as {
     __supabase?: SupabaseClient
@@ -20,6 +20,3 @@ export const getSupabase = (): SupabaseClient => {
     }
     return globalForSupabase.__supabase
 }
-
-// Re-export as `supabase` for convenience — only call from client-side code
-export const supabase = typeof window !== 'undefined' ? getSupabase() : (null as unknown as SupabaseClient)

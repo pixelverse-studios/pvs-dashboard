@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchMe } from '../lib/me-service'
+import { fetchMe } from '@/lib/me-service'
 
 export const useMe = (enabled: boolean) => {
     return useQuery({

@@ -1,6 +1,7 @@
-import { supabase } from './supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export const signInWithGoogle = async (redirectTo?: string) => {
+    const supabase = getSupabase()
     const target = redirectTo ?? `${window.location.origin}/`
 
     if (typeof window !== 'undefined') {
@@ -24,17 +25,20 @@ export const signInWithGoogle = async (redirectTo?: string) => {
 }
 
 export const signOut = async () => {
+    const supabase = getSupabase()
     const { error } = await supabase.auth.signOut()
     if (error) throw error
 }
 
 export const getSession = async () => {
+    const supabase = getSupabase()
     const { data, error } = await supabase.auth.getSession()
     if (error) throw error
     return data.session
 }
 
 export const getUser = async () => {
+    const supabase = getSupabase()
     const { data, error } = await supabase.auth.getUser()
     if (error) throw error
     return data.user

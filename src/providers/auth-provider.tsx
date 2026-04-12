@@ -1,11 +1,18 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    type ReactNode,
+} from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { Session } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
-import { useMe } from '../hooks/use-me'
-import type { MeResponse } from '../types/me'
-import '../lib/auth-bridge'
+import { getSupabase } from '@/lib/supabase'
+import { useMe } from '@/hooks/use-me'
+import type { MeResponse } from '@/types/me'
+import '@/lib/auth-bridge'
 
 interface AuthContextValue {
     session: Session | null
@@ -18,18 +25,15 @@ interface AuthContextValue {
     hasAnyAccess: boolean
 }
 
-const AuthContext = createContext<AuthContextValue>({
-    session: null,
-    isLoadingSession: true,
-    me: null,
-    isLoadingMe: false,
-    meError: null,
-    isAuthenticated: false,
-    isPvsAdmin: false,
-    hasAnyAccess: false,
-})
+const AuthContext = createContext<AuthContextValue | null>(null)
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+    const ctx = useContext(AuthContext)
+    if (!ctx) {
+        throw new Error('useAuth must be used within <AuthProvider>')
+    }
+    return ctx
+}
 
 interface SessionState {
     session: Session | null
@@ -37,26 +41,29 @@ interface SessionState {
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const queryClient = useQueryClient()
     const [sessionState, setSessionState] = useState<SessionState>({
         session: null,
         isLoading: true,
     })
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => {
-            setSessionState({ session: data.session, isLoading: false })
-        })
+        const supabase = getSupabase()
 
         const { data: subscription } = supabase.auth.onAuthStateChange(
-            (_event, nextSession) => {
+            (event, nextSession) => {
                 setSessionState({ session: nextSession, isLoading: false })
+
+                if (event === 'SIGNED_OUT') {
+                    queryClient.removeQueries({ queryKey: ['me'] })
+                }
             },
         )
 
         return () => {
             subscription.subscription.unsubscribe()
         }
-    }, [])
+    }, [queryClient])
 
     const meQuery = useMe(!!sessionState.session)
     const me = meQuery.data ?? null
@@ -69,8 +76,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         meError: meQuery.error,
         isAuthenticated: !!sessionState.session,
         isPvsAdmin: !!me?.is_pvs_admin,
-        hasAnyAccess: !!me && (me.is_pvs_admin || me.assignments.length > 0),
+        hasAnyAccess:
+            !!me && (me.is_pvs_admin || me.assignments.length > 0),
     }
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
