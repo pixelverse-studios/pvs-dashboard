@@ -1,65 +1,107 @@
-import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function Home() {
     return (
-        <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-            <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-                <Image
-                    className="dark:invert"
-                    src="/next.svg"
-                    alt="Next.js logo"
-                    width={100}
-                    height={20}
-                    priority
-                />
-                <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-                    <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-                        To get started, edit the page.tsx file.
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 py-16">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                        PVS Dashboard
                     </h1>
-                    <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-                        Looking for a starting point or more instructions? Head over to{' '}
-                        <a
-                            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                            className="font-medium text-zinc-950 dark:text-zinc-50"
-                        >
-                            Templates
-                        </a>{' '}
-                        or the{' '}
-                        <a
-                            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                            className="font-medium text-zinc-950 dark:text-zinc-50"
-                        >
-                            Learning
-                        </a>{' '}
-                        center.
+                    <p className="text-muted-foreground">
+                        Multi-tenant CMS dashboard. Theme tokens are wired via CSS variables.
                     </p>
                 </div>
-                <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-                    <a
-                        className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-                        href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <Image
-                            className="dark:invert"
-                            src="/vercel.svg"
-                            alt="Vercel logomark"
-                            width={16}
-                            height={16}
-                        />
-                        Deploy Now
-                    </a>
-                    <a
-                        className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Documentation
-                    </a>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Primary Theme</CardTitle>
+                            <CardDescription>PVS purple brand color</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-3">
+                            <div className="flex h-12 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+                                --primary
+                            </div>
+                            <div className="flex gap-2">
+                                <Button>Default</Button>
+                                <Button variant="outline">Outline</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Secondary Theme</CardTitle>
+                            <CardDescription>PVS magenta brand color</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-3">
+                            <div className="flex h-12 items-center justify-center rounded-lg bg-secondary text-secondary-foreground text-sm font-medium">
+                                --secondary
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="secondary">Secondary</Button>
+                                <Button variant="ghost">Ghost</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
-            </main>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>All Tokens</CardTitle>
+                        <CardDescription>
+                            Open DevTools and change CSS variables on :root to see the theme update
+                            live.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-3">
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-primary" />
+                                <span className="text-xs text-muted-foreground">primary</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-secondary" />
+                                <span className="text-xs text-muted-foreground">secondary</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border border-border bg-accent" />
+                                <span className="text-xs text-muted-foreground">accent</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border border-border bg-muted" />
+                                <span className="text-xs text-muted-foreground">muted</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-destructive" />
+                                <span className="text-xs text-muted-foreground">destructive</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-success" />
+                                <span className="text-xs text-muted-foreground">success</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg bg-warning" />
+                                <span className="text-xs text-muted-foreground">warning</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border border-border bg-card" />
+                                <span className="text-xs text-muted-foreground">card</span>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="size-10 rounded-lg border-2 border-border" />
+                                <span className="text-xs text-muted-foreground">border</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <p className="text-center text-sm text-muted-foreground">
+                    This demo page will be replaced by the dashboard shell in a future ticket.
+                </p>
+            </div>
         </div>
     )
 }
