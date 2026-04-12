@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { resolveHostname } from '../lib/branding-service'
-import { applyBranding } from '../lib/apply-branding'
+import { applyBranding, resetBranding } from '../lib/apply-branding'
 import { getCurrentHostname } from '../lib/hostname'
 import type { ResolvedWebsiteContext } from '../types/branding'
 
@@ -44,20 +44,30 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
 
         let cancelled = false
 
-        resolveHostname(hostname).then((result) => {
-            if (cancelled) return
-            if (result) {
-                applyBranding(result.branding)
-            }
-            setState({
-                website: result,
-                isLoading: false,
-                isResolved: true,
+        resolveHostname(hostname)
+            .then((result) => {
+                if (cancelled) return
+                if (result) {
+                    applyBranding(result.branding)
+                }
+                setState({
+                    website: result,
+                    isLoading: false,
+                    isResolved: true,
+                })
             })
-        })
+            .catch(() => {
+                if (cancelled) return
+                setState({
+                    website: null,
+                    isLoading: false,
+                    isResolved: true,
+                })
+            })
 
         return () => {
             cancelled = true
+            resetBranding()
         }
     }, [hostname])
 
