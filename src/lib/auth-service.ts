@@ -30,6 +30,8 @@ export const signOut = async () => {
     if (error) throw error
 }
 
+// Reads from Supabase's localStorage cache — no server round-trip.
+// Use getUser() instead for security-sensitive identity verification.
 export const getSession = async () => {
     const supabase = getSupabase()
     const { data, error } = await supabase.auth.getSession()
