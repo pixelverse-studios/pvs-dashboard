@@ -137,8 +137,10 @@
     --muted: #1a1a1a;
     --muted-foreground: #888888;
 
-    /* Destructive */
+    /* Semantic colors */
     --destructive: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
 
     /* Borders + inputs */
     --border: #2a2a2a;
