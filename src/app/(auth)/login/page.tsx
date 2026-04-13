@@ -7,13 +7,6 @@ import { useAuth } from '@/providers/auth-provider'
 import { useBranding } from '@/providers/branding-provider'
 import { signInWithGoogle } from '@/lib/auth-service'
 import { Button } from '@/components/ui/button'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
 import { FullScreenLoader } from '@/components/full-screen-loader'
 import { GoogleIcon } from '@/components/icons/google'
 
@@ -75,60 +68,76 @@ export default function LoginPage() {
     }
 
     return (
-        <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
+        <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-8 lg:hidden">
+                <div className="mb-6 flex justify-center">
+                    <div className="inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
+                        <span className="text-lg font-bold text-primary">
+                            P
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mb-8 text-center lg:text-left">
                 {logoUrl && isValidLogoUrl(logoUrl) ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={logoUrl}
                         alt={`${clientName} logo`}
-                        className="mx-auto mb-4 h-12 object-contain"
+                        className="mx-auto mb-6 h-10 object-contain lg:mx-0"
                     />
                 ) : (
                     <Image
                         src="/pvs-logo.svg"
                         alt="PixelVerse Studios"
-                        width={160}
-                        height={32}
-                        className="mx-auto mb-4"
+                        width={140}
+                        height={28}
+                        className="mx-auto mb-6 lg:mx-0"
                         priority
                     />
                 )}
-                <CardTitle>
-                    Sign in to {clientName}
-                </CardTitle>
-                <CardDescription>
-                    Use your Google account to access your
-                    content management dashboard.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    Welcome back
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                    Sign in to access the {clientName} dashboard.
+                </p>
+            </div>
+
+            <div className="space-y-4">
                 <Button
                     onClick={handleSignIn}
                     disabled={isSigningIn}
-                    className="w-full"
+                    variant="outline"
+                    className="group h-12 w-full rounded-xl text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                     size="lg"
                 >
-                    <GoogleIcon className="mr-2 size-5" />
+                    <GoogleIcon className="mr-3 size-5 transition-transform group-hover:scale-110" />
                     {isSigningIn
                         ? 'Redirecting...'
                         : 'Sign in with Google'}
                 </Button>
 
                 {error && (
-                    <p className="text-center text-sm text-destructive">
+                    <div className="animate-in fade-in slide-in-from-top-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
                         {error}
-                    </p>
+                    </div>
                 )}
+            </div>
 
-                {website === null && (
-                    <p className="rounded-md bg-muted p-3 text-center text-xs text-muted-foreground">
-                        This dashboard isn&apos;t configured for
-                        your domain yet. Contact PixelVerse
-                        Studios if you believe this is an error.
-                    </p>
-                )}
-            </CardContent>
-        </Card>
+            {website === null && (
+                <div className="mt-6 rounded-lg border border-warning/20 bg-warning/5 px-4 py-3 text-center text-xs text-muted-foreground">
+                    This dashboard isn&apos;t configured for your
+                    domain yet. Contact PixelVerse Studios if you
+                    believe this is an error.
+                </div>
+            )}
+
+            <p className="mt-8 text-center text-xs text-muted-foreground/60">
+                Secured by Google OAuth &middot; Powered by
+                PixelVerse Studios
+            </p>
+        </div>
     )
 }
