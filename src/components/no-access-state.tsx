@@ -1,6 +1,6 @@
 'use client'
 
-import { ShieldX, Mail, LogOut } from 'lucide-react'
+import { ShieldX, Mail, LogOut, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/providers/auth-provider'
 import { signOut } from '@/lib/auth-service'
@@ -10,51 +10,74 @@ export const NoAccessState = () => {
     const email = session?.user?.email
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-6">
-            <div className="relative max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="absolute -top-px left-1/2 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="relative flex min-h-screen flex-col bg-background">
+            <div className="absolute inset-x-0 top-0 h-[45vh] overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(63,0,233,0.08),transparent_70%)]" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />
+            </div>
 
-                <div className="rounded-2xl border border-border bg-card px-8 py-12 text-center shadow-lg">
-                    <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10">
+            <div className="relative flex flex-1 flex-col items-center justify-center px-6">
+                <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+                    <div className="mx-auto mb-8 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 ring-1 ring-primary/10">
                         <ShieldX
-                            className="size-10 text-primary"
-                            strokeWidth={1.5}
+                            className="size-12 text-primary/70"
+                            strokeWidth={1.2}
                         />
                     </div>
+                </div>
 
-                    <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100">
+                    <h1 className="text-center text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                         Access pending
                     </h1>
-                    <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
+                </div>
+
+                <div className="animate-in fade-in slide-in-from-bottom-3 duration-700 fill-mode-both delay-200">
+                    <p className="mt-4 max-w-md text-center text-base leading-relaxed text-muted-foreground">
                         You&apos;re signed in, but your account
                         doesn&apos;t have any CMS assignments yet.
                         A PixelVerse Studios admin needs to grant
-                        you access.
+                        you access before you can continue.
                     </p>
+                </div>
 
-                    {email && (
-                        <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full bg-muted/60 px-4 py-2 text-xs text-muted-foreground">
-                            <Mail className="size-3.5" />
+                {email && (
+                    <div className="animate-in fade-in duration-500 fill-mode-both delay-300">
+                        <div className="mt-6 flex items-center gap-2 rounded-full border border-border bg-muted/40 px-5 py-2.5 text-sm text-muted-foreground">
+                            <Mail className="size-4" />
                             {email}
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    <div className="mt-8 flex flex-col items-center gap-3">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both delay-500">
+                    <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
                         <Button
                             onClick={() => signOut()}
                             variant="outline"
-                            className="cursor-pointer gap-2 rounded-xl"
+                            size="lg"
+                            className="cursor-pointer gap-2 rounded-xl px-6"
                         >
                             <LogOut className="size-4" />
                             Sign out
                         </Button>
-                        <p className="text-xs text-muted-foreground/50">
-                            Try signing in with a different account,
-                            or contact your admin.
-                        </p>
+                        <Button
+                            onClick={() => signOut()}
+                            variant="ghost"
+                            size="lg"
+                            className="cursor-pointer gap-2 text-muted-foreground"
+                        >
+                            Try a different account
+                            <ArrowRight className="size-4" />
+                        </Button>
                     </div>
                 </div>
             </div>
+
+            <footer className="relative pb-8 pt-4 text-center text-xs text-muted-foreground/40">
+                Powered by PixelVerse Studios
+            </footer>
         </div>
     )
 }
