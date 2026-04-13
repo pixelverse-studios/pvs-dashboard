@@ -110,7 +110,7 @@ export default function LoginPage() {
                     onClick={handleSignIn}
                     disabled={isSigningIn}
                     variant="outline"
-                    className="group h-12 w-full rounded-xl text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    className="group h-12 w-full cursor-pointer rounded-xl text-sm font-medium shadow-md ring-1 ring-border transition-all hover:-translate-y-1 hover:shadow-lg hover:ring-primary/20"
                     size="lg"
                 >
                     <GoogleIcon className="mr-3 size-5 transition-transform group-hover:scale-110" />
