@@ -81,12 +81,15 @@ export default function LoginPage() {
 
             <div className="mb-8 text-center lg:text-left">
                 {logoUrl && isValidLogoUrl(logoUrl) ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                        src={logoUrl}
-                        alt={`${clientName} logo`}
-                        className="mx-auto mb-6 h-10 object-contain lg:mx-0"
-                    />
+                    <div className="mb-6 h-10 lg:text-left">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={logoUrl}
+                            alt={`${clientName} logo`}
+                            className="mx-auto h-full w-auto
+                                object-contain lg:mx-0"
+                        />
+                    </div>
                 ) : (
                     <Image
                         src="/pvs-logo.svg"
