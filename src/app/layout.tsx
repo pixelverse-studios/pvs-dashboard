@@ -4,6 +4,7 @@ import { Geist_Mono } from 'next/font/google'
 import { QueryProvider } from '@/providers/query-provider'
 import { BrandingProvider } from '@/providers/branding-provider'
 import { AuthProvider } from '@/providers/auth-provider'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const inter = Inter({
@@ -19,8 +20,14 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: 'PVS Dashboard',
-    description: 'Multi-tenant CMS dashboard for PVS clients',
+    title: {
+        default: 'CMS Dashboard',
+        template: '%s · CMS Dashboard',
+    },
+    description: 'Content management dashboard',
+    icons: {
+        icon: '/favicon.ico',
+    },
 }
 
 export default function RootLayout({
@@ -29,11 +36,20 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
+        <html
+            lang="en"
+            className={`${inter.variable} ${geistMono.variable}`}
+        >
             <body className="min-h-screen bg-background font-sans antialiased">
                 <QueryProvider>
                     <BrandingProvider>
-                        <AuthProvider>{children}</AuthProvider>
+                        <AuthProvider>
+                            {children}
+                            <Toaster
+                                position="top-right"
+                                richColors
+                            />
+                        </AuthProvider>
                     </BrandingProvider>
                 </QueryProvider>
             </body>

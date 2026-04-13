@@ -72,6 +72,14 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [hostname])
 
+    useEffect(() => {
+        if (!state.website) return
+        const { website_title, client } = state.website
+        const name =
+            website_title || client.company_name || 'CMS Dashboard'
+        document.title = `${name} CMS`
+    }, [state.website])
+
     if (state.isLoading) {
         return <FullScreenLoader />
     }
