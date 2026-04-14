@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react'
 import { resolveHostname } from '@/lib/branding-service'
 import { applyBranding, resetBranding } from '@/lib/apply-branding'
 import { getCurrentHostname } from '@/lib/hostname'
@@ -72,12 +79,14 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [hostname])
 
+    const titleAppliedRef = useRef(false)
     useEffect(() => {
-        if (!state.website) return
+        if (!state.website || titleAppliedRef.current) return
         const { website_title, client } = state.website
         const name =
             website_title || client.company_name || 'CMS Dashboard'
         document.title = `${name} CMS`
+        titleAppliedRef.current = true
     }, [state.website])
 
     if (state.isLoading) {

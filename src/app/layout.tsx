@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     },
     description: 'Content management dashboard',
     icons: {
-        icon: '/favicon.ico',
+        icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
     },
 }
 
