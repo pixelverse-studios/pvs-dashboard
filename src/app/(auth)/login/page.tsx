@@ -26,7 +26,7 @@ export default function LoginPage() {
         isLoadingSession,
         isLoadingMe,
     } = useAuth()
-    const { website, isResolved } = useBranding()
+    const { website, isResolved, shouldResolveHostname } = useBranding()
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 )}
             </div>
 
-            {website === null && (
+            {shouldResolveHostname && website === null && (
                 <div className="mt-6 rounded-lg border border-warning/20 bg-warning/5 px-4 py-3 text-center text-xs text-muted-foreground">
                     This dashboard isn&apos;t configured for your
                     domain yet. Contact PixelVerse Studios if you

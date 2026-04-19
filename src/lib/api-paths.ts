@@ -2,6 +2,7 @@ const p = (segment: string) => encodeURIComponent(segment)
 
 export const apiPaths = {
     me: '/api/cms/me',
+    clients: '/api/clients?limit=100',
     resolveHostname: (hostname: string) =>
         `/api/cms/resolve-hostname?hostname=${encodeURIComponent(hostname)}`,
     clientUsers: (clientId: string) => `/api/cms/clients/${p(clientId)}/users`,

@@ -20,6 +20,7 @@ import {
 import { useAuth } from '@/providers/auth-provider'
 import { signOut } from '@/lib/auth-service'
 import { SidebarContent } from './dashboard-sidebar'
+import { ClientSwitcher } from './client-switcher'
 
 const getInitials = (email: string) => {
     if (!email) return '?'
@@ -57,6 +58,7 @@ export const DashboardTopbar = () => {
                         <SidebarContent />
                     </SheetContent>
                 </Sheet>
+                <ClientSwitcher />
             </div>
 
             <DropdownMenu>

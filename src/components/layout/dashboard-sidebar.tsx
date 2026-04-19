@@ -12,29 +12,30 @@ import {
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/auth-provider'
 import { useBranding } from '@/providers/branding-provider'
+import { useActiveClient } from '@/providers/active-client-provider'
 
 interface NavItem {
     label: string
-    href: string
+    href: (clientId: string) => string
     icon: React.ComponentType<{ className?: string }>
     adminOnly?: boolean
 }
 
 const navItems: NavItem[] = [
-    { label: 'Pages', href: '/pages', icon: FileText },
+    { label: 'Pages', href: (clientId) => `/clients/${clientId}/pages`, icon: FileText },
     {
         label: 'Templates',
-        href: '/templates',
+        href: (clientId) => `/clients/${clientId}/templates`,
         icon: LayoutTemplate,
         adminOnly: true,
     },
     {
         label: 'Users',
-        href: '/users',
+        href: (clientId) => `/clients/${clientId}/users`,
         icon: Users,
         adminOnly: true,
     },
-    { label: 'Settings', href: '/settings', icon: Settings },
+    { label: 'Settings', href: (clientId) => `/clients/${clientId}/settings`, icon: Settings },
 ]
 
 const getClientName = (
@@ -67,6 +68,7 @@ export const SidebarContent = () => {
     const pathname = usePathname()
     const { isPvsAdmin } = useAuth()
     const { website } = useBranding()
+    const { activeClient } = useActiveClient()
     const clientName = getClientName(website)
     const logoUrl = website?.branding?.logo_url
 
@@ -97,11 +99,12 @@ export const SidebarContent = () => {
 
             <nav className="flex-1 space-y-1 px-3 py-4">
                 {visibleItems.map((item) => {
-                    const active = isNavActive(pathname, item.href)
+                    const href = activeClient ? item.href(activeClient.id) : '#'
+                    const active = isNavActive(pathname, href)
                     return (
                         <Link
-                            key={item.href}
-                            href={item.href}
+                            key={item.label}
+                            href={href}
                             className={cn(
                                 'flex items-center gap-3 rounded-lg',
                                 'px-3 py-2 text-sm font-medium',
@@ -111,6 +114,7 @@ export const SidebarContent = () => {
                                     : 'text-muted-foreground',
                                 !active &&
                                     'hover:bg-muted hover:text-foreground',
+                                !activeClient && 'pointer-events-none opacity-50',
                             )}
                         >
                             <item.icon className="size-4" />
