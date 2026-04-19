@@ -67,10 +67,10 @@ const isNavActive = (pathname: string, href: string) =>
 export const SidebarContent = () => {
     const pathname = usePathname()
     const { isPvsAdmin } = useAuth()
-    const { website } = useBranding()
+    const { shellWebsite } = useBranding()
     const { activeClient } = useActiveClient()
-    const clientName = getClientName(website)
-    const logoUrl = website?.branding?.logo_url
+    const clientName = getClientName(shellWebsite)
+    const logoUrl = shellWebsite?.branding?.logo_url
 
     const visibleItems = navItems.filter(
         (item) => !item.adminOnly || isPvsAdmin,

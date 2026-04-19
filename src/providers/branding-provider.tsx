@@ -18,6 +18,7 @@ export type AppMode = 'dashboard' | 'client'
 
 interface BrandingContextValue {
     website: ResolvedWebsiteContext | null
+    shellWebsite: ResolvedWebsiteContext | null
     isLoading: boolean
     isResolved: boolean
     mode: AppMode
@@ -26,6 +27,7 @@ interface BrandingContextValue {
 
 const BrandingContext = createContext<BrandingContextValue>({
     website: null,
+    shellWebsite: null,
     isLoading: true,
     isResolved: false,
     mode: 'dashboard',
@@ -101,18 +103,19 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
     }, [hostname, shouldResolveHostname])
 
     const state = shouldResolveHostname ? resolvedState : resolvedEmpty
+    const shellWebsite = mode === 'client' ? state.website : null
 
     useEffect(() => {
-        const name = state.website
-            ? state.website.website_title ||
-              state.website.client.company_name ||
+        const name = shellWebsite
+            ? shellWebsite.website_title ||
+              shellWebsite.client.company_name ||
               'CMS Dashboard'
             : mode === 'dashboard'
               ? 'PVS Dashboard'
               : 'CMS Dashboard'
 
         document.title = `${name} CMS`
-    }, [mode, state.website])
+    }, [mode, shellWebsite])
 
     if (state.isLoading) {
         return <FullScreenLoader />
@@ -122,6 +125,7 @@ export const BrandingProvider = ({ children }: { children: ReactNode }) => {
         <BrandingContext.Provider
             value={{
                 ...state,
+                shellWebsite,
                 mode,
                 shouldResolveHostname,
             }}
