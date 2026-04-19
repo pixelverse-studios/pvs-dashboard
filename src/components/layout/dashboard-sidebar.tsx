@@ -101,39 +101,31 @@ export const SidebarContent = () => {
     return (
         <div className="flex h-full flex-col bg-[linear-gradient(180deg,#fff_0%,#f8f7ff_100%)]">
             <div className="border-b border-border/80 px-4 py-5">
-                <div className="rounded-[1.6rem] border border-border/70 bg-white/90 p-4 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.45)]">
-                    <div className="flex items-center gap-3">
-                        {logoUrl && isValidLogoUrl(logoUrl) ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                                src={logoUrl}
-                                alt={clientName}
-                                className="h-8 w-auto max-w-[160px] object-contain"
-                            />
-                        ) : (
-                            <Image
-                                src="/pvs-logo.svg"
-                                alt="PixelVerse Studios"
-                                width={140}
-                                height={28}
-                                priority
-                            />
-                        )}
-                    </div>
+                <div className="flex items-center gap-3">
+                    {logoUrl && isValidLogoUrl(logoUrl) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                            src={logoUrl}
+                            alt={clientName}
+                            className="h-8 w-auto max-w-[160px] object-contain"
+                        />
+                    ) : (
+                        <Image
+                            src="/pvs-logo.svg"
+                            alt="PixelVerse Studios"
+                            width={140}
+                            height={28}
+                            priority
+                        />
+                    )}
+                </div>
 
-                    <div className="mt-4 rounded-2xl border border-primary/10 bg-[linear-gradient(135deg,rgba(63,0,233,0.08),rgba(255,255,255,0.92),rgba(201,71,255,0.10))] p-4">
-                        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/12 bg-white/85 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
-                            <Sparkles className="size-3.5" />
-                            {isPvsAdmin ? 'Admin shell' : 'Client shell'}
-                        </div>
-                        <p className="text-sm leading-6 text-muted-foreground">
-                            {isPvsAdmin
-                                ? 'Switch context, launch client workspaces, and keep dashboard mode anchored to PixelVerse Studios.'
-                                : 'Operate inside the active client scope with tenant-aware navigation and content.'}
-                        </p>
+                <div className="mt-5 space-y-3">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                        <Sparkles className="size-3.5" />
+                        {isPvsAdmin ? 'Admin shell' : 'Client shell'}
                     </div>
-
-                    <div className="mt-4">
+                    <div className="rounded-[1.35rem] border border-border/70 bg-white px-3 py-3 shadow-[0_16px_36px_-32px_rgba(17,17,17,0.28)]">
                         <ClientSwitcher variant="sidebar" />
                     </div>
                 </div>

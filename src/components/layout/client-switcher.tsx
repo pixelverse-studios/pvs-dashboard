@@ -36,7 +36,7 @@ const getTriggerClassName = (variant: ClientSwitcherVariant) =>
     cn(
         'justify-between rounded-xl',
         variant === 'sidebar'
-            ? 'h-12 w-full border-border/70 bg-white/80 px-4 shadow-sm'
+            ? 'h-12 w-full border-0 bg-transparent px-1 shadow-none'
             : 'hidden min-w-56 md:flex',
     )
 
