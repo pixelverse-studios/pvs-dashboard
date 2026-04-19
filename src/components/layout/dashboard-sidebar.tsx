@@ -8,6 +8,7 @@ import {
     FileText,
     LayoutTemplate,
     LogOut,
+    PanelsTopLeft,
     Sparkles,
     Users,
     Settings,
@@ -101,37 +102,80 @@ export const SidebarContent = () => {
     return (
         <div className="flex h-full flex-col bg-[linear-gradient(180deg,#fff_0%,#f8f7ff_100%)]">
             <div className="border-b border-border/80 px-4 py-5">
-                <div className="flex items-center gap-3">
-                    {logoUrl && isValidLogoUrl(logoUrl) ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                            src={logoUrl}
-                            alt={clientName}
-                            className="h-8 w-auto max-w-[160px] object-contain"
-                        />
-                    ) : (
-                        <Image
-                            src="/pvs-logo.svg"
-                            alt="PixelVerse Studios"
-                            width={140}
-                            height={28}
-                            priority
-                        />
-                    )}
-                </div>
+                {isPvsAdmin ? (
+                    <Link
+                        href="/"
+                        className="block rounded-[1.35rem] transition-colors hover:bg-primary/4"
+                    >
+                        <div className="flex items-center gap-3 px-3 py-3">
+                            {logoUrl && isValidLogoUrl(logoUrl) ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                    src={logoUrl}
+                                    alt={clientName}
+                                    className="h-8 w-auto max-w-[160px] object-contain"
+                                />
+                            ) : (
+                                <Image
+                                    src="/pvs-logo.svg"
+                                    alt="PixelVerse Studios"
+                                    width={140}
+                                    height={28}
+                                    priority
+                                />
+                            )}
+                        </div>
+                    </Link>
+                ) : (
+                    <div className="flex items-center gap-3">
+                        {logoUrl && isValidLogoUrl(logoUrl) ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                                src={logoUrl}
+                                alt={clientName}
+                                className="h-8 w-auto max-w-[160px] object-contain"
+                            />
+                        ) : (
+                            <Image
+                                src="/pvs-logo.svg"
+                                alt="PixelVerse Studios"
+                                width={140}
+                                height={28}
+                                priority
+                            />
+                        )}
+                    </div>
+                )}
 
-                <div className="mt-5 space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
-                        <Sparkles className="size-3.5" />
-                        {isPvsAdmin ? 'Admin shell' : 'Client shell'}
+                {isPvsAdmin && (
+                    <div className="mt-5 space-y-3">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                            <Sparkles className="size-3.5" />
+                            Admin shell
+                        </div>
+                        <div className="rounded-[1.35rem] border border-border/70 bg-white px-3 py-3 shadow-[0_16px_36px_-32px_rgba(17,17,17,0.28)]">
+                            <ClientSwitcher variant="sidebar" />
+                        </div>
                     </div>
-                    <div className="rounded-[1.35rem] border border-border/70 bg-white px-3 py-3 shadow-[0_16px_36px_-32px_rgba(17,17,17,0.28)]">
-                        <ClientSwitcher variant="sidebar" />
-                    </div>
-                </div>
+                )}
             </div>
 
             <nav className="flex-1 space-y-1 px-3 py-4">
+                {isPvsAdmin && (
+                    <Link
+                        href="/"
+                        className={cn(
+                            'mb-2 flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-sm font-medium transition-[background-color,border-color,color,box-shadow] duration-200 ease-out',
+                            pathname === '/'
+                                ? 'border-primary/40 bg-[linear-gradient(135deg,rgba(63,0,233,0.92),rgba(89,40,255,0.96))] text-primary-foreground shadow-[0_16px_34px_-24px_rgba(63,0,233,0.8)]'
+                                : 'border-transparent bg-transparent text-muted-foreground hover:border-primary/12 hover:bg-primary/6 hover:text-foreground hover:shadow-[0_14px_24px_-22px_rgba(63,0,233,0.22)]',
+                        )}
+                    >
+                        <PanelsTopLeft className="size-4" />
+                        <span>Command center</span>
+                    </Link>
+                )}
+
                 {visibleItems.map((item) => {
                     const href = activeClient ? item.href(activeClient.id) : null
                     const active = href
