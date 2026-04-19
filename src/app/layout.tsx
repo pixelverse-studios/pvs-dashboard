@@ -4,6 +4,7 @@ import { Geist_Mono } from 'next/font/google'
 import { QueryProvider } from '@/providers/query-provider'
 import { BrandingProvider } from '@/providers/branding-provider'
 import { AuthProvider } from '@/providers/auth-provider'
+import { ActiveClientProvider } from '@/providers/active-client-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -44,11 +45,13 @@ export default function RootLayout({
                 <QueryProvider>
                     <BrandingProvider>
                         <AuthProvider>
-                            {children}
-                            <Toaster
-                                position="top-right"
-                                richColors
-                            />
+                            <ActiveClientProvider>
+                                {children}
+                                <Toaster
+                                    position="top-right"
+                                    richColors
+                                />
+                            </ActiveClientProvider>
                         </AuthProvider>
                     </BrandingProvider>
                 </QueryProvider>
