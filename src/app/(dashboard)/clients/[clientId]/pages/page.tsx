@@ -20,8 +20,8 @@ export default function ClientPagesPage() {
     const clientLabel = getClientLabel(activeClient)
 
     return (
-        <div className="space-y-6">
-            <div className="rounded-3xl border border-border bg-card p-8">
+        <div className="space-y-6 p-6 md:p-8">
+            <div className="rounded-3xl border border-border bg-card p-8 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
                 <div className="flex items-start gap-4">
                     <div className="rounded-2xl bg-primary/10 p-3 text-primary">
                         <FileText className="size-6" />

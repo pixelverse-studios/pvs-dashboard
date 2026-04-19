@@ -14,6 +14,8 @@ import { useActiveClient } from '@/providers/active-client-provider'
 import { useAuth } from '@/providers/auth-provider'
 import { cn } from '@/lib/utils'
 
+type ClientSwitcherVariant = 'topbar' | 'sidebar'
+
 const getClientLabel = (
     client: ReturnType<typeof useActiveClient>['activeClient'],
 ) => {
@@ -26,7 +28,21 @@ const getClientLabel = (
     )
 }
 
-export const ClientSwitcher = () => {
+interface ClientSwitcherProps {
+    variant?: ClientSwitcherVariant
+}
+
+const getTriggerClassName = (variant: ClientSwitcherVariant) =>
+    cn(
+        'justify-between rounded-xl',
+        variant === 'sidebar'
+            ? 'h-12 w-full border-border/70 bg-white/80 px-4 shadow-sm'
+            : 'hidden min-w-56 md:flex',
+    )
+
+export const ClientSwitcher = ({
+    variant = 'topbar',
+}: ClientSwitcherProps) => {
     const { isPvsAdmin } = useAuth()
     const { activeClient, availableClients, setActiveClient, isLoading } =
         useActiveClient()
@@ -52,7 +68,7 @@ export const ClientSwitcher = () => {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="hidden min-w-56 justify-between rounded-xl md:flex"
+                    className={getTriggerClassName(variant)}
                     onClick={() => setAdminOpen(true)}
                 >
                     <span className="truncate">{getClientLabel(activeClient)}</span>
@@ -129,7 +145,7 @@ export const ClientSwitcher = () => {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="hidden min-w-56 justify-between rounded-xl md:flex"
+                        className={getTriggerClassName(variant)}
                     />
                 }
             >

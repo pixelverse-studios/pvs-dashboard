@@ -57,11 +57,14 @@ const pendingState: BrandingState = {
 export const BrandingProvider = ({ children }: { children: ReactNode }) => {
     const pathname = usePathname()
     const hostname = getCurrentHostname()
+    const isLoginRoute = pathname === '/login'
     const mode: AppMode = pathname.startsWith('/clients/')
         ? 'client'
         : 'dashboard'
     const shouldResolveHostname =
-        !!hostname && !isLocalHostname(hostname)
+        !!hostname &&
+        !isLocalHostname(hostname) &&
+        (mode === 'client' || isLoginRoute)
 
     const [resolvedState, setResolvedState] = useState<BrandingState>(
         pendingState,
