@@ -9,10 +9,28 @@ import {
     SheetContent,
     SheetTrigger,
 } from '@/components/ui/sheet'
+import { useBranding } from '@/providers/branding-provider'
 import { SidebarContent } from './dashboard-sidebar'
+
+const isValidLogoUrl = (url: string) => {
+    try {
+        return new URL(url).protocol === 'https:'
+    } catch {
+        return false
+    }
+}
 
 export const DashboardTopbar = () => {
     const [sheetOpen, setSheetOpen] = useState(false)
+    const { shellWebsite } = useBranding()
+    const logoUrl = shellWebsite?.branding?.logo_url
+    const clientName =
+        shellWebsite?.client.company_name ||
+        [shellWebsite?.client.firstname, shellWebsite?.client.lastname]
+            .filter(Boolean)
+            .join(' ') ||
+        shellWebsite?.website_title ||
+        'PixelVerse Studios'
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-white/90 px-4 backdrop-blur md:hidden">
@@ -40,13 +58,22 @@ export const DashboardTopbar = () => {
                         <SidebarContent />
                     </SheetContent>
                 </Sheet>
-                <Image
-                    src="/pvs-logo.svg"
-                    alt="PixelVerse Studios"
-                    width={124}
-                    height={26}
-                    priority
-                />
+                {logoUrl && isValidLogoUrl(logoUrl) ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={logoUrl}
+                        alt={clientName}
+                        className="h-7 w-auto max-w-[132px] object-contain"
+                    />
+                ) : (
+                    <Image
+                        src="/pvs-logo.svg"
+                        alt="PixelVerse Studios"
+                        width={124}
+                        height={26}
+                        priority
+                    />
+                )}
             </div>
         </header>
     )

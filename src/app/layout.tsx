@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Geist_Mono } from 'next/font/google'
 import { QueryProvider } from '@/providers/query-provider'
-import { BrandingProvider } from '@/providers/branding-provider'
 import { AuthProvider } from '@/providers/auth-provider'
 import { ActiveClientProvider } from '@/providers/active-client-provider'
+import { BrandingProvider } from '@/providers/branding-provider'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -43,17 +43,17 @@ export default function RootLayout({
         >
             <body className="min-h-screen bg-background font-sans antialiased">
                 <QueryProvider>
-                    <BrandingProvider>
-                        <AuthProvider>
-                            <ActiveClientProvider>
+                    <AuthProvider>
+                        <ActiveClientProvider>
+                            <BrandingProvider>
                                 {children}
                                 <Toaster
                                     position="top-right"
                                     richColors
                                 />
-                            </ActiveClientProvider>
-                        </AuthProvider>
-                    </BrandingProvider>
+                            </BrandingProvider>
+                        </ActiveClientProvider>
+                    </AuthProvider>
                 </QueryProvider>
             </body>
         </html>

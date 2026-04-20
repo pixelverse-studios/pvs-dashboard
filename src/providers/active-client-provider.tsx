@@ -13,7 +13,11 @@ import { toast } from 'sonner'
 import { useClients } from '@/hooks/use-clients'
 import { useAuth } from '@/providers/auth-provider'
 import type { ClientAssignmentWebsite } from '@/types/me'
-import type { ClientSummary, ClientListItem } from '@/types/client'
+import type {
+    ClientSummary,
+    ClientListItem,
+    ClientListWebsite,
+} from '@/types/client'
 
 const STORAGE_KEY = 'pvs-dashboard:active-client-id'
 
@@ -47,6 +51,22 @@ const toActiveClient = (
         firstname: client.firstname,
         lastname: client.lastname,
         company_name: client.company_name,
+    }
+}
+
+const toActiveWebsite = (
+    website: ClientAssignmentWebsite | ClientListWebsite | null,
+): ClientAssignmentWebsite | null => {
+    if (!website) return null
+
+    if ('id' in website) {
+        return website
+    }
+
+    return {
+        id: website.website_id,
+        title: website.website_title,
+        domain: website.domain,
     }
 }
 
@@ -135,11 +155,19 @@ export const ActiveClientProvider = ({ children }: { children: ReactNode }) => {
 
     const activeWebsite = useMemo(() => {
         if (!activeClient) return null
-        const assignment = me?.assignments.find(
-            (item) => item.client_id === activeClient.id,
+        if (!isPvsAdmin) {
+            const assignment = me?.assignments.find(
+                (item) => item.client_id === activeClient.id,
+            )
+            return toActiveWebsite(assignment?.websites[0] ?? null)
+        }
+
+        const brandedClient = clientsQuery.data?.clients?.find(
+            (client) => client.client_id === activeClient.id,
         )
-        return assignment?.websites[0] ?? null
-    }, [activeClient, me?.assignments])
+
+        return toActiveWebsite(brandedClient?.websites?.[0] ?? null)
+    }, [activeClient, clientsQuery.data?.clients, isPvsAdmin, me?.assignments])
 
     const isLoading = isLoadingMe || (isPvsAdmin && clientsQuery.isLoading)
 

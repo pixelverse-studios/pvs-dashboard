@@ -91,6 +91,7 @@ export const SidebarContent = () => {
     const { isPvsAdmin, session } = useAuth()
     const { shellWebsite } = useBranding()
     const { activeClient } = useActiveClient()
+    const isCommandCenter = pathname === '/'
     const clientName = getClientName(shellWebsite)
     const logoUrl = shellWebsite?.branding?.logo_url
     const email = session?.user?.email ?? ''
@@ -149,10 +150,12 @@ export const SidebarContent = () => {
 
                 {isPvsAdmin && (
                     <div className="mt-5 space-y-3">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
-                            <Sparkles className="size-3.5" />
-                            Admin shell
-                        </div>
+                        {isCommandCenter && (
+                            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                                <Sparkles className="size-3.5" />
+                                Admin shell
+                            </div>
+                        )}
                         <div className="rounded-[1.35rem] border border-border/70 bg-white px-3 py-3 shadow-[0_16px_36px_-32px_rgba(17,17,17,0.28)]">
                             <ClientSwitcher variant="sidebar" />
                         </div>
