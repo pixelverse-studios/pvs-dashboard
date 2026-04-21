@@ -8,12 +8,19 @@ import {
     useRef,
     type ReactNode,
 } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { usePathname, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useClients } from '@/hooks/use-clients'
+import { resolveHostname } from '@/lib/branding-service'
+import { getCurrentHostname, isLocalHostname } from '@/lib/hostname'
 import { useAuth } from '@/providers/auth-provider'
 import type { ClientAssignmentWebsite } from '@/types/me'
-import type { ClientSummary, ClientListItem } from '@/types/client'
+import type {
+    ClientSummary,
+    ClientListItem,
+    ClientListWebsite,
+} from '@/types/client'
 
 const STORAGE_KEY = 'pvs-dashboard:active-client-id'
 
@@ -50,6 +57,22 @@ const toActiveClient = (
     }
 }
 
+const toActiveWebsite = (
+    website: ClientAssignmentWebsite | ClientListWebsite | null,
+): ClientAssignmentWebsite | null => {
+    if (!website) return null
+
+    if ('id' in website) {
+        return website
+    }
+
+    return {
+        id: website.website_id,
+        title: website.website_title,
+        domain: website.domain,
+    }
+}
+
 const readStoredClientId = () => {
     if (typeof window === 'undefined') return null
     return window.localStorage.getItem(STORAGE_KEY)
@@ -78,6 +101,18 @@ export const ActiveClientProvider = ({ children }: { children: ReactNode }) => {
     const pathname = usePathname()
     const { me, isAuthenticated, isLoadingMe, isPvsAdmin } = useAuth()
     const clientsQuery = useClients(isAuthenticated && isPvsAdmin)
+    const activeClientIdFromUrl = getClientIdFromPath(pathname)
+    const currentHostname = getCurrentHostname()
+    const hostnameSeed =
+        currentHostname && !isLocalHostname(currentHostname)
+            ? currentHostname
+            : null
+    const hostnameContextQuery = useQuery({
+        queryKey: ['resolved-hostname', hostnameSeed],
+        queryFn: () => resolveHostname(hostnameSeed!),
+        enabled: isAuthenticated && !!hostnameSeed && !activeClientIdFromUrl,
+        staleTime: 5 * 60_000,
+    })
     const unauthorizedToastShownRef = useRef<string | null>(null)
 
     const assignmentClients = useMemo(() => {
@@ -103,24 +138,38 @@ export const ActiveClientProvider = ({ children }: { children: ReactNode }) => {
         return assignmentClients
     }, [assignmentClients, clientsQuery.data?.clients, isPvsAdmin])
 
-    const activeClientIdFromUrl = getClientIdFromPath(pathname)
+    const hostnameSeededClient = useMemo(() => {
+        const resolvedClientId = hostnameContextQuery.data?.client.id
+        if (!resolvedClientId) return null
+
+        return (
+            availableClients.find((client) => client.id === resolvedClientId) ??
+            null
+        )
+    }, [availableClients, hostnameContextQuery.data?.client.id])
+
+    const storedClient = (() => {
+        const storedClientId = readStoredClientId()
+        if (!storedClientId) return null
+
+        return (
+            availableClients.find((client) => client.id === storedClientId) ??
+            null
+        )
+    })()
 
     const fallbackClient = useMemo(() => {
-        const storedClientId = readStoredClientId()
-
-        if (storedClientId) {
-            const storedClient = availableClients.find(
-                (client) => client.id === storedClientId,
-            )
-            if (storedClient) return storedClient
-        }
+        // Hostname can seed the default client context for host-based entry,
+        // but explicit /clients/:id routes and stored admin choices remain authoritative.
+        if (storedClient) return storedClient
+        if (hostnameSeededClient) return hostnameSeededClient
 
         if (!isPvsAdmin) {
             return assignmentClients[0] ?? null
         }
 
         return availableClients[0] ?? null
-    }, [assignmentClients, availableClients, isPvsAdmin])
+    }, [assignmentClients, availableClients, hostnameSeededClient, isPvsAdmin, storedClient])
 
     const activeClient = useMemo(() => {
         if (activeClientIdFromUrl) {
@@ -135,13 +184,26 @@ export const ActiveClientProvider = ({ children }: { children: ReactNode }) => {
 
     const activeWebsite = useMemo(() => {
         if (!activeClient) return null
-        const assignment = me?.assignments.find(
-            (item) => item.client_id === activeClient.id,
-        )
-        return assignment?.websites[0] ?? null
-    }, [activeClient, me?.assignments])
+        if (!isPvsAdmin) {
+            const assignment = me?.assignments.find(
+                (item) => item.client_id === activeClient.id,
+            )
+            return toActiveWebsite(assignment?.websites[0] ?? null)
+        }
 
-    const isLoading = isLoadingMe || (isPvsAdmin && clientsQuery.isLoading)
+        const brandedClient = clientsQuery.data?.clients?.find(
+            (client) => client.client_id === activeClient.id,
+        )
+
+        return toActiveWebsite(brandedClient?.websites?.[0] ?? null)
+    }, [activeClient, clientsQuery.data?.clients, isPvsAdmin, me?.assignments])
+
+    const isLoading =
+        isLoadingMe ||
+        (isPvsAdmin && clientsQuery.isLoading) ||
+        (!!hostnameSeed &&
+            !activeClientIdFromUrl &&
+            hostnameContextQuery.isLoading)
 
     useEffect(() => {
         if (!activeClient) return
