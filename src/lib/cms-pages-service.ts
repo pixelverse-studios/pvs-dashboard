@@ -6,6 +6,9 @@ interface RawCmsPage {
     id?: string
     page_id?: string
     slug?: string | null
+    route?: string | null
+    path?: string | null
+    public_path?: string | null
     status?: string | null
     updated_at?: string | null
     updatedAt?: string | null
@@ -24,6 +27,11 @@ interface RawCmsPagesResponse {
 const normalizePage = (page: RawCmsPage): CmsPageListItem => ({
     id: page.id ?? page.page_id ?? '',
     slug: page.slug ?? '',
+    route:
+        page.route ??
+        page.path ??
+        page.public_path ??
+        (page.slug ? `/${page.slug}` : ''),
     status: page.status ?? null,
     updated_at: page.updated_at ?? page.updatedAt ?? null,
     template: {
@@ -47,6 +55,6 @@ export const listPagesForClient = async (
     return {
         pages: pages
             .map(normalizePage)
-            .filter((page) => page.id && page.slug),
+            .filter((page) => page.id && (page.slug || page.route)),
     }
 }

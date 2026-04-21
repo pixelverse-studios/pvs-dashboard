@@ -5,6 +5,7 @@ export interface CmsPageTemplateSummary {
 export interface CmsPageListItem {
     id: string
     slug: string
+    route: string
     status: string | null
     updated_at: string | null
     template: CmsPageTemplateSummary | null
