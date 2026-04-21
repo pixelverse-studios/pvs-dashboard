@@ -12,6 +12,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { RichTextEditor } from '@/components/rich-text-editor'
+import { useAuth } from '@/providers/auth-provider'
 
 const demoContent = `<h2>About PixelVerse Studios</h2><p>We help growing businesses launch websites that are clear, polished, and easy to update.</p><p><strong>Use this editor</strong> to validate formatting, links, lists, and blockquotes against the backend allowlist.</p><blockquote>Keep the editor honest: what Jennifer sees here should be what the server saves.</blockquote><ul><li>Bold, italic, underline</li><li>Headings, lists, and blockquotes</li><li>Links that open safely in a new tab</li></ul>`
 
@@ -22,6 +23,7 @@ export default function ClientPageDetailPage({
 }) {
     const { clientId, pageId } = use(params)
     const [value, setValue] = useState(demoContent)
+    const { isPvsAdmin } = useAuth()
 
     return (
         <div className="space-y-6 p-6 md:p-8">
@@ -50,8 +52,7 @@ export default function ClientPageDetailPage({
                             <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-[0.95rem]">
                                 This route now demonstrates the shared rich text
                                 editor for `DEV-704`, including formatting
-                                controls, safe link insertion, and canonical HTML
-                                output.
+                                controls and safe link insertion.
                             </p>
                         </div>
                     </div>
@@ -66,19 +67,21 @@ export default function ClientPageDetailPage({
                                 {pageId}
                             </p>
                             <p>
-                                <span className="font-medium text-foreground">Output:</span>{' '}
-                                HTML string
-                            </p>
-                            <p>
                                 <span className="font-medium text-foreground">Paste mode:</span>{' '}
                                 plain text
                             </p>
+                            {isPvsAdmin ? (
+                                <p>
+                                    <span className="font-medium text-foreground">Inspector:</span>{' '}
+                                    raw HTML output
+                                </p>
+                            ) : null}
                         </div>
                     </div>
                 </div>
             </section>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <div className={isPvsAdmin ? 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]' : 'grid gap-6'}>
                 <Card className="rounded-[1.2rem] border border-border/80 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
                     <CardHeader className="border-b border-border/70">
                         <CardTitle>Editor</CardTitle>
@@ -96,22 +99,24 @@ export default function ClientPageDetailPage({
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-[1.2rem] border border-border/80 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
-                    <CardHeader className="border-b border-border/70">
-                        <div className="mb-2 flex size-9 items-center justify-center rounded-[0.85rem] bg-primary/10 text-primary">
-                            <Code2 className="size-4.5" />
-                        </div>
-                        <CardTitle>HTML output</CardTitle>
-                        <CardDescription>
-                            This is the exact string emitted through `onChange`.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="py-5">
-                        <pre className="min-h-[280px] overflow-x-auto rounded-[1rem] border border-border/70 bg-[#fcfcfe] p-4 text-xs leading-6 text-foreground whitespace-pre-wrap break-words">
-                            {value || '""'}
-                        </pre>
-                    </CardContent>
-                </Card>
+                {isPvsAdmin ? (
+                    <Card className="rounded-[1.2rem] border border-border/80 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
+                        <CardHeader className="border-b border-border/70">
+                            <div className="mb-2 flex size-9 items-center justify-center rounded-[0.85rem] bg-primary/10 text-primary">
+                                <Code2 className="size-4.5" />
+                            </div>
+                            <CardTitle>HTML output</CardTitle>
+                            <CardDescription>
+                                This is the exact string emitted through `onChange`.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="py-5">
+                            <pre className="min-h-[280px] overflow-x-auto rounded-[1rem] border border-border/70 bg-[#fcfcfe] p-4 text-xs leading-6 text-foreground whitespace-pre-wrap break-words">
+                                {value || '""'}
+                            </pre>
+                        </CardContent>
+                    </Card>
+                ) : null}
             </div>
         </div>
     )
