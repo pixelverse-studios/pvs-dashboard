@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Check, ChevronDown, Search } from 'lucide-react'
+import { Check, ChevronDown, Search, SquareStack } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -34,10 +34,10 @@ interface ClientSwitcherProps {
 
 const getTriggerClassName = (variant: ClientSwitcherVariant) =>
     cn(
-        'justify-between rounded-xl',
+        'justify-between rounded-none',
         variant === 'sidebar'
-            ? 'h-12 w-full border-0 bg-transparent px-1 shadow-none'
-            : 'hidden min-w-56 md:flex',
+            ? 'h-auto min-h-12 w-full border-0 bg-transparent px-1 shadow-none hover:bg-transparent'
+            : 'hidden min-w-56 border-border bg-white shadow-none md:flex',
     )
 
 export const ClientSwitcher = ({
@@ -71,7 +71,19 @@ export const ClientSwitcher = ({
                     className={getTriggerClassName(variant)}
                     onClick={() => setAdminOpen(true)}
                 >
-                    <span className="truncate">{getClientLabel(activeClient)}</span>
+                    <span className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-8 shrink-0 items-center justify-center border border-border bg-white text-primary">
+                            <SquareStack className="size-4" />
+                        </span>
+                        <span className="min-w-0 text-left">
+                            <span className="block truncate text-sm font-semibold">
+                                {getClientLabel(activeClient)}
+                            </span>
+                            <span className="block text-xs text-muted-foreground">
+                                Active client
+                            </span>
+                        </span>
+                    </span>
                     <ChevronDown className="size-4 text-muted-foreground" />
                 </Button>
 
@@ -79,7 +91,7 @@ export const ClientSwitcher = ({
                     open={adminOpen}
                     onOpenChange={setAdminOpen}
                 >
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="rounded-none sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>Switch client</DialogTitle>
                         </DialogHeader>
@@ -91,11 +103,11 @@ export const ClientSwitcher = ({
                                     value={query}
                                     onChange={(event) => setQuery(event.target.value)}
                                     placeholder="Search clients..."
-                                    className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm outline-none ring-0 transition focus:border-ring"
+                                    className="h-11 w-full rounded-none border border-border bg-background pl-10 pr-3 text-sm outline-none ring-0 transition focus:border-ring"
                                 />
                             </div>
 
-                            <div className="max-h-80 overflow-y-auto rounded-xl border border-border bg-card p-2">
+                            <div className="max-h-80 overflow-y-auto border border-border bg-[#f8f8f6] p-2">
                                 {filteredClients.length === 0 ? (
                                     <p className="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No clients match that search.
@@ -114,10 +126,10 @@ export const ClientSwitcher = ({
                                                     setQuery('')
                                                 }}
                                                 className={cn(
-                                                    'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                                                    'flex w-full items-center justify-between border-l-2 px-3 py-2 text-left text-sm transition-colors',
                                                     selected
-                                                        ? 'bg-accent text-accent-foreground'
-                                                        : 'hover:bg-muted',
+                                                        ? 'border-primary bg-primary/6 text-foreground'
+                                                        : 'border-transparent hover:border-primary/40 hover:bg-primary/4',
                                                 )}
                                             >
                                                 <span className="truncate">
@@ -149,12 +161,24 @@ export const ClientSwitcher = ({
                     />
                 }
             >
-                <span className="truncate">{getClientLabel(activeClient)}</span>
+                <span className="flex min-w-0 items-center gap-3">
+                    <span className="flex size-8 shrink-0 items-center justify-center border border-border bg-white text-primary">
+                        <SquareStack className="size-4" />
+                    </span>
+                    <span className="min-w-0 text-left">
+                        <span className="block truncate text-sm font-semibold">
+                            {getClientLabel(activeClient)}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                            Active client
+                        </span>
+                    </span>
+                </span>
                 <ChevronDown className="size-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 align="start"
-                className="min-w-64"
+                className="min-w-64 rounded-none"
             >
                 {availableClients.map((client) => {
                     const selected = client.id === activeClient?.id
@@ -163,7 +187,10 @@ export const ClientSwitcher = ({
                         <DropdownMenuItem
                             key={client.id}
                             onClick={() => setActiveClient(client.id)}
-                            className="justify-between"
+                            className={cn(
+                                'justify-between rounded-none border-l-2',
+                                selected ? 'border-primary bg-primary/6' : 'border-transparent',
+                            )}
                         >
                             <span>{getClientLabel(client)}</span>
                             {selected && (

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Menu } from 'lucide-react'
+import { Command, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Sheet,
@@ -33,7 +33,7 @@ export const DashboardTopbar = () => {
         'PixelVerse Studios'
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-white/90 px-4 backdrop-blur md:hidden">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-white/92 px-4 backdrop-blur md:hidden">
             <div className="flex items-center gap-3">
                 <Sheet
                     open={sheetOpen}
@@ -44,7 +44,7 @@ export const DashboardTopbar = () => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="md:hidden"
+                                className="rounded-none border border-border bg-[#f8f8f6] md:hidden"
                                 aria-label="Open menu"
                             />
                         }
@@ -53,27 +53,35 @@ export const DashboardTopbar = () => {
                     </SheetTrigger>
                     <SheetContent
                         side="left"
-                        className="w-64 p-0"
+                        className="w-80 max-w-[86vw] gap-0 border-border bg-white p-0"
                     >
                         <SidebarContent />
                     </SheetContent>
                 </Sheet>
-                {logoUrl && isValidLogoUrl(logoUrl) ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                        src={logoUrl}
-                        alt={clientName}
-                        className="h-7 w-auto max-w-[132px] object-contain"
-                    />
-                ) : (
-                    <Image
-                        src="/pvs-logo.svg"
-                        alt="PixelVerse Studios"
-                        width={124}
-                        height={26}
-                        priority
-                    />
-                )}
+                <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                        <Command className="size-4" />
+                    </div>
+                    {logoUrl && isValidLogoUrl(logoUrl) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                            src={logoUrl}
+                            alt={clientName}
+                            className="h-7 w-auto max-w-[132px] object-contain"
+                        />
+                    ) : (
+                        <Image
+                            src="/pvs-logo.svg"
+                            alt="PixelVerse Studios"
+                            width={124}
+                            height={26}
+                            priority
+                        />
+                    )}
+                </div>
+            </div>
+            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-[62%] rounded-full bg-primary" />
             </div>
         </header>
     )

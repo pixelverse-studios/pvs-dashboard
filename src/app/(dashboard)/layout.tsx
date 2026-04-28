@@ -31,11 +31,11 @@ export default function DashboardLayout({
     }
 
     return (
-        <div className="flex h-screen bg-background">
+        <div className="flex h-screen bg-[#f8f8f6] text-foreground">
             <DashboardSidebar />
-            <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <DashboardTopbar />
-                <main className="flex-1 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto bg-[#f8f8f6]">
                     {children}
                 </main>
             </div>
