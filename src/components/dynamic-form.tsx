@@ -13,7 +13,6 @@ import {
 import { z } from 'zod/v4'
 import { TriangleAlert, ImageIcon } from 'lucide-react'
 import { RichTextEditor } from '@/components/rich-text-editor'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
@@ -163,29 +162,49 @@ const FieldShell = ({
     htmlFor?: string
     children: React.ReactNode
 }) => (
-    <div className="space-y-2.5">
-        <div className="space-y-1">
-            <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
-                {field.label}
-                {field.required ? <span className="ml-1 text-destructive">*</span> : null}
-            </label>
+    <div
+        className={cn(
+            'group/field relative border-l-2 py-1 pl-5 transition-colors focus-within:border-primary',
+            error ? 'border-destructive' : 'border-border',
+        )}
+    >
+        <div className="mb-2 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+                <label htmlFor={htmlFor} className="text-sm font-semibold text-foreground">
+                    {field.label}
+                </label>
+                <span
+                    className={cn(
+                        'inline-flex items-center border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]',
+                        field.required
+                            ? 'border-primary/20 bg-primary/6 text-primary'
+                            : 'border-border bg-muted/45 text-muted-foreground',
+                    )}
+                >
+                    {field.required ? 'Required' : 'Optional'}
+                </span>
+            </div>
             {field.help ? (
                 <p className="text-sm leading-6 text-muted-foreground">{field.help}</p>
             ) : null}
         </div>
         {children}
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? (
+            <p className="mt-2 border-l-2 border-destructive bg-destructive/6 px-3 py-2 text-sm font-medium text-destructive">
+                {error}
+            </p>
+        ) : null}
     </div>
 )
 
 const UnsupportedField = ({ field }: { field: CmsTemplateField }) => (
-    <Card className="border border-amber-200 bg-amber-50/70 shadow-none">
-        <CardContent className="flex items-start gap-3 px-4 py-4">
-            <div className="rounded-[0.8rem] bg-amber-100 p-2 text-amber-700">
+    <div className="border-l-2 border-warning bg-warning/8 px-4 py-4">
+        <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-warning/20 bg-warning/10 text-warning">
                 <TriangleAlert className="size-4" />
             </div>
-            <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">
+            <div className="min-w-0 space-y-1">
+                <p className="text-sm font-semibold text-foreground">
                     Unsupported field type: {field.type}
                 </p>
                 <p className="text-sm leading-6 text-muted-foreground">
@@ -193,24 +212,28 @@ const UnsupportedField = ({ field }: { field: CmsTemplateField }) => (
                     edited yet.
                 </p>
             </div>
-        </CardContent>
-    </Card>
+        </div>
+    </div>
 )
 
 const ImagePlaceholderField = ({ field, value }: { field: CmsTemplateField; value: string }) => (
     <FieldShell field={field}>
-        <div className="rounded-[1rem] border border-dashed border-border/90 bg-[#fbfbfd] p-4">
+        <div className="border border-dashed border-border bg-muted/30 p-4">
             <div className="flex items-start gap-3">
-                <div className="rounded-[0.85rem] bg-muted p-2 text-muted-foreground">
+                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-border bg-white text-muted-foreground">
                     <ImageIcon className="size-4" />
                 </div>
-                <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">Image uploads coming soon</p>
+                <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold text-foreground">
+                        Image uploads coming soon
+                    </p>
                     <p className="text-sm leading-6 text-muted-foreground">
                         Tracked in the image-gallery milestone.
                     </p>
                     {value ? (
-                        <p className="break-all text-sm text-foreground">Current URL: {value}</p>
+                        <p className="break-all border-l-2 border-primary bg-primary/4 px-3 py-2 text-sm text-foreground">
+                            Current URL: {value}
+                        </p>
                     ) : null}
                 </div>
             </div>
@@ -245,6 +268,8 @@ const DynamicFormFields = ({
                                 id={fieldId}
                                 disabled={disabled}
                                 maxLength={field.max_length ?? undefined}
+                                aria-invalid={!!error}
+                                className="rounded-none bg-white shadow-none focus-visible:border-primary focus-visible:ring-primary/15"
                             />
                         </FieldShell>
                     )
@@ -258,6 +283,8 @@ const DynamicFormFields = ({
                                 id={fieldId}
                                 disabled={disabled}
                                 maxLength={field.max_length ?? undefined}
+                                aria-invalid={!!error}
+                                className="rounded-none bg-white shadow-none focus-visible:border-primary focus-visible:ring-primary/15"
                             />
                         </FieldShell>
                     )
@@ -279,8 +306,9 @@ const DynamicFormFields = ({
                                         }
                                         onChange={controllerField.onChange}
                                         disabled={disabled}
+                                        invalid={!!error}
                                         placeholder={
-                                            field.help ?? `Write ${field.label.toLowerCase()}…`
+                                            field.help ?? `Write ${field.label.toLowerCase()}...`
                                         }
                                     />
                                 </FieldShell>
@@ -297,7 +325,12 @@ const DynamicFormFields = ({
                             control={control}
                             render={({ field: controllerField }) => (
                                 <FieldShell field={field} error={error}>
-                                    <div className="flex items-center justify-between rounded-[1rem] border border-border/80 bg-white px-4 py-3">
+                                    <div
+                                        className={cn(
+                                            'flex items-center justify-between border bg-white px-4 py-3',
+                                            error ? 'border-destructive' : 'border-border',
+                                        )}
+                                    >
                                         <p className="text-sm text-muted-foreground">
                                             {controllerField.value ? 'Enabled' : 'Disabled'}
                                         </p>
