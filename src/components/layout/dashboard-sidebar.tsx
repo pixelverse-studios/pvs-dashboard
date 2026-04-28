@@ -11,7 +11,6 @@ import {
     LogOut,
     Palette,
     PanelsTopLeft,
-    Sparkles,
     Users,
     Settings,
 } from 'lucide-react'
@@ -130,7 +129,6 @@ export const SidebarContent = () => {
     const { isPvsAdmin, session } = useAuth()
     const { shellWebsite } = useBranding()
     const { activeClient } = useActiveClient()
-    const isCommandCenter = pathname === '/'
     const clientName = getClientName(shellWebsite)
     const logoUrl = shellWebsite?.branding?.logo_url
     const email = session?.user?.email ?? ''
