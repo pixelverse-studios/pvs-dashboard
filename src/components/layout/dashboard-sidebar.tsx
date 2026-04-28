@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
     ChevronDown,
+    CircleDot,
     FileText,
     LayoutTemplate,
     LogOut,
@@ -34,9 +35,10 @@ import { signOut } from '@/lib/auth-service'
 
 interface NavItem {
     label: string
-    href: (clientId: string) => string
+    href: (clientId?: string) => string
     icon: React.ComponentType<{ className?: string }>
     adminOnly?: boolean
+    requiresClient?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -46,6 +48,7 @@ const navItems: NavItem[] = [
         href: () => '/component-polish',
         icon: Palette,
         adminOnly: true,
+        requiresClient: false,
     },
     {
         label: 'Templates',
@@ -93,6 +96,35 @@ const getInitials = (email: string) => {
     return email.slice(0, 2).toUpperCase()
 }
 
+const CommandStrip = ({
+    label,
+    status,
+}: {
+    label: string
+    status: string
+}) => (
+    <div className="border-b border-border bg-white px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <PanelsTopLeft className="size-4" />
+                </div>
+                <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                        {label}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                        {status}
+                    </p>
+                </div>
+            </div>
+            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-[62%] rounded-full bg-primary" />
+            </div>
+        </div>
+    </div>
+)
+
 export const SidebarContent = () => {
     const pathname = usePathname()
     const { isPvsAdmin, session } = useAuth()
@@ -107,15 +139,22 @@ export const SidebarContent = () => {
         (item) => !item.adminOnly || isPvsAdmin,
     )
 
+    const workspaceStatus = isPvsAdmin ? 'Admin workspace' : 'Client workspace'
+
     return (
-        <div className="flex h-full flex-col bg-[linear-gradient(180deg,#fff_0%,#f8f7ff_100%)]">
-            <div className="border-b border-border/80 px-4 py-5">
+        <div className="flex h-full flex-col bg-white">
+            <CommandStrip
+                label={isPvsAdmin ? 'PVS CMS' : clientName}
+                status={workspaceStatus}
+            />
+
+            <div className="border-b border-border px-4 py-5">
                 {isPvsAdmin ? (
                     <Link
                         href="/"
-                        className="block rounded-[1.35rem] transition-colors hover:bg-primary/4"
+                        className="block transition-colors hover:bg-primary/4"
                     >
-                        <div className="flex items-center gap-3 px-3 py-3">
+                        <div className="flex items-center gap-3 border-l-2 border-primary/70 px-3 py-2">
                             {logoUrl && isValidLogoUrl(logoUrl) ? (
                                 /* eslint-disable-next-line @next/next/no-img-element */
                                 <img
@@ -135,7 +174,7 @@ export const SidebarContent = () => {
                         </div>
                     </Link>
                 ) : (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 border-l-2 border-primary/70 px-3 py-2">
                         {logoUrl && isValidLogoUrl(logoUrl) ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img
@@ -158,12 +197,12 @@ export const SidebarContent = () => {
                 {isPvsAdmin && (
                     <div className="mt-5 space-y-3">
                         {isCommandCenter && (
-                            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
-                                <Sparkles className="size-3.5" />
+                            <div className="inline-flex items-center gap-2 border-l-2 border-primary pl-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                                <Sparkles className="size-3.5 text-primary" />
                                 Admin shell
                             </div>
                         )}
-                        <div className="rounded-[1.35rem] border border-border/70 bg-white px-3 py-3 shadow-[0_16px_36px_-32px_rgba(17,17,17,0.28)]">
+                        <div className="border border-border bg-[#f8f8f6] px-3 py-3">
                             <ClientSwitcher variant="sidebar" />
                         </div>
                     </div>
@@ -175,33 +214,40 @@ export const SidebarContent = () => {
                     <Link
                         href="/"
                         className={cn(
-                            'mb-2 flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-sm font-medium transition-[background-color,border-color,color,box-shadow] duration-200 ease-out',
+                            'group relative mb-2 flex items-center gap-3 border-l-2 px-3.5 py-3 text-sm font-semibold transition-colors duration-200 ease-out',
                             pathname === '/'
-                                ? 'border-primary/40 bg-[linear-gradient(135deg,rgba(63,0,233,0.92),rgba(89,40,255,0.96))] text-primary-foreground shadow-[0_16px_34px_-24px_rgba(63,0,233,0.8)]'
-                                : 'border-transparent bg-transparent text-muted-foreground hover:border-primary/12 hover:bg-primary/6 hover:text-foreground hover:shadow-[0_14px_24px_-22px_rgba(63,0,233,0.22)]',
+                                ? 'border-primary bg-primary/6 text-foreground'
+                                : 'border-transparent text-muted-foreground hover:border-primary/40 hover:bg-primary/4 hover:text-foreground',
                         )}
                     >
                         <PanelsTopLeft className="size-4" />
                         <span>Command center</span>
+                        {pathname === '/' ? (
+                            <CircleDot className="ml-auto size-3 text-primary" />
+                        ) : null}
                     </Link>
                 )}
 
                 {visibleItems.map((item) => {
-                    const href = activeClient ? item.href(activeClient.id) : null
+                    const requiresClient = item.requiresClient ?? true
+                    const href =
+                        requiresClient && !activeClient
+                            ? null
+                            : item.href(activeClient?.id)
                     const active = href
                         ? isNavActive(pathname, href)
                         : false
 
                     const itemClassName = cn(
-                        'flex items-center gap-3 rounded-2xl',
-                        'px-3.5 py-3 text-sm font-medium',
-                        'border transition-[background-color,border-color,color,box-shadow] duration-200 ease-out',
+                        'group relative flex items-center gap-3 border-l-2',
+                        'px-3.5 py-3 text-sm font-semibold',
+                        'transition-colors duration-200 ease-out',
                         active
-                            ? 'border-primary/40 bg-[linear-gradient(135deg,rgba(63,0,233,0.92),rgba(89,40,255,0.96))] text-primary-foreground shadow-[0_16px_34px_-24px_rgba(63,0,233,0.8)]'
-                            : 'border-transparent bg-transparent text-muted-foreground',
+                            ? 'border-primary bg-primary/6 text-foreground'
+                            : 'border-transparent text-muted-foreground',
                         !active &&
-                            'hover:border-primary/12 hover:bg-primary/6 hover:text-foreground hover:shadow-[0_14px_24px_-22px_rgba(63,0,233,0.22)]',
-                        !activeClient && 'cursor-not-allowed opacity-50',
+                            'hover:border-primary/40 hover:bg-primary/4 hover:text-foreground',
+                        !href && 'cursor-not-allowed opacity-50',
                     )
 
                     if (!href) {
@@ -213,6 +259,9 @@ export const SidebarContent = () => {
                             >
                                 <item.icon className="size-4" />
                                 <span>{item.label}</span>
+                                {active ? (
+                                    <CircleDot className="ml-auto size-3 text-primary" />
+                                ) : null}
                             </div>
                         )
                     }
@@ -225,18 +274,21 @@ export const SidebarContent = () => {
                         >
                             <item.icon className="size-4" />
                             <span>{item.label}</span>
+                            {active ? (
+                                <CircleDot className="ml-auto size-3 text-primary" />
+                            ) : null}
                         </Link>
                     )
                 })}
             </nav>
 
-            <div className="border-t border-border/80 px-4 py-4">
+            <div className="border-t border-border px-4 py-4">
                 <DropdownMenu>
                     <DropdownMenuTrigger
                         render={
                             <Button
                                 variant="ghost"
-                                className="h-auto w-full justify-between rounded-[1.25rem] border border-border/70 bg-white/85 px-3 py-3 shadow-sm"
+                                className="h-auto w-full justify-between rounded-none border border-border bg-[#f8f8f6] px-3 py-3 shadow-none hover:bg-primary/4"
                             />
                         }
                     >
@@ -257,11 +309,7 @@ export const SidebarContent = () => {
                         </div>
                         <ChevronDown className="size-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        align="end"
-                        side="top"
-                        className="w-64"
-                    >
+                    <DropdownMenuContent align="end" side="top" className="w-64 rounded-none">
                         <DropdownMenuGroup>
                             <DropdownMenuLabel className="font-normal">
                                 {email}
@@ -276,7 +324,7 @@ export const SidebarContent = () => {
                 </DropdownMenu>
 
                 {!(logoUrl && isValidLogoUrl(logoUrl)) && (
-                    <p className="mt-3 text-xs text-muted-foreground">
+                    <p className="mt-3 border-l-2 border-border pl-3 text-xs text-muted-foreground">
                         Powered by PixelVerse Studios
                     </p>
                 )}
@@ -286,7 +334,7 @@ export const SidebarContent = () => {
 }
 
 export const DashboardSidebar = () => (
-    <aside className="hidden w-80 shrink-0 border-r border-border/80 bg-card md:block">
+    <aside className="hidden w-80 shrink-0 border-r border-border bg-white md:block">
         <SidebarContent />
     </aside>
 )
