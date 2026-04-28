@@ -40,6 +40,28 @@ const getTriggerClassName = (variant: ClientSwitcherVariant) =>
             : 'hidden min-w-56 border-border bg-white shadow-none md:flex',
     )
 
+const ClientSwitcherLabel = ({
+    label,
+    description,
+}: {
+    label: string
+    description: string
+}) => (
+    <span className="flex min-w-0 items-center gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center border border-border bg-white text-primary">
+            <SquareStack className="size-4" />
+        </span>
+        <span className="min-w-0 text-left">
+            <span className="block truncate text-sm font-semibold">
+                {label}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+                {description}
+            </span>
+        </span>
+    </span>
+)
+
 export const ClientSwitcher = ({
     variant = 'topbar',
 }: ClientSwitcherProps) => {
@@ -58,8 +80,19 @@ export const ClientSwitcher = ({
         )
     }, [availableClients, query])
 
-    if (isLoading || availableClients.length <= 1) {
+    if (variant !== 'sidebar' && (isLoading || availableClients.length <= 1)) {
         return null
+    }
+
+    if (variant === 'sidebar' && (isLoading || availableClients.length <= 1)) {
+        return (
+            <div className="flex min-h-12 w-full items-center justify-between px-1">
+                <ClientSwitcherLabel
+                    label={isLoading ? 'Loading clients' : getClientLabel(activeClient)}
+                    description={isLoading ? 'Workspace context' : 'Active client'}
+                />
+            </div>
+        )
     }
 
     if (isPvsAdmin) {
@@ -71,19 +104,10 @@ export const ClientSwitcher = ({
                     className={getTriggerClassName(variant)}
                     onClick={() => setAdminOpen(true)}
                 >
-                    <span className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-8 shrink-0 items-center justify-center border border-border bg-white text-primary">
-                            <SquareStack className="size-4" />
-                        </span>
-                        <span className="min-w-0 text-left">
-                            <span className="block truncate text-sm font-semibold">
-                                {getClientLabel(activeClient)}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">
-                                Active client
-                            </span>
-                        </span>
-                    </span>
+                    <ClientSwitcherLabel
+                        label={getClientLabel(activeClient)}
+                        description="Active client"
+                    />
                     <ChevronDown className="size-4 text-muted-foreground" />
                 </Button>
 
@@ -161,19 +185,10 @@ export const ClientSwitcher = ({
                     />
                 }
             >
-                <span className="flex min-w-0 items-center gap-3">
-                    <span className="flex size-8 shrink-0 items-center justify-center border border-border bg-white text-primary">
-                        <SquareStack className="size-4" />
-                    </span>
-                    <span className="min-w-0 text-left">
-                        <span className="block truncate text-sm font-semibold">
-                            {getClientLabel(activeClient)}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">
-                            Active client
-                        </span>
-                    </span>
-                </span>
+                <ClientSwitcherLabel
+                    label={getClientLabel(activeClient)}
+                    description="Active client"
+                />
                 <ChevronDown className="size-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent

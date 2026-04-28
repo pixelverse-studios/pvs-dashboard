@@ -11,7 +11,6 @@ import {
     LogOut,
     Palette,
     PanelsTopLeft,
-    Sparkles,
     Users,
     Settings,
 } from 'lucide-react'
@@ -130,7 +129,6 @@ export const SidebarContent = () => {
     const { isPvsAdmin, session } = useAuth()
     const { shellWebsite } = useBranding()
     const { activeClient } = useActiveClient()
-    const isCommandCenter = pathname === '/'
     const clientName = getClientName(shellWebsite)
     const logoUrl = shellWebsite?.branding?.logo_url
     const email = session?.user?.email ?? ''
@@ -148,32 +146,14 @@ export const SidebarContent = () => {
                 status={workspaceStatus}
             />
 
-            <div className="border-b border-border px-4 py-5">
-                {isPvsAdmin ? (
-                    <Link
-                        href="/"
-                        className="block transition-colors hover:bg-primary/4"
-                    >
-                        <div className="flex items-center gap-3 border-l-2 border-primary/70 px-3 py-2">
-                            {logoUrl && isValidLogoUrl(logoUrl) ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
-                                    src={logoUrl}
-                                    alt={clientName}
-                                    className="h-8 w-auto max-w-[160px] object-contain"
-                                />
-                            ) : (
-                                <Image
-                                    src="/pvs-logo.svg"
-                                    alt="PixelVerse Studios"
-                                    width={140}
-                                    height={28}
-                                    priority
-                                />
-                            )}
-                        </div>
-                    </Link>
-                ) : (
+            {isPvsAdmin ? (
+                <div className="border-b border-border px-4 py-4">
+                    <div className="border border-border bg-[#f8f8f6] px-3 py-3">
+                        <ClientSwitcher variant="sidebar" />
+                    </div>
+                </div>
+            ) : (
+                <div className="border-b border-border px-4 py-5">
                     <div className="flex items-center gap-3 border-l-2 border-primary/70 px-3 py-2">
                         {logoUrl && isValidLogoUrl(logoUrl) ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
@@ -192,22 +172,8 @@ export const SidebarContent = () => {
                             />
                         )}
                     </div>
-                )}
-
-                {isPvsAdmin && (
-                    <div className="mt-5 space-y-3">
-                        {isCommandCenter && (
-                            <div className="inline-flex items-center gap-2 border-l-2 border-primary pl-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                                <Sparkles className="size-3.5 text-primary" />
-                                Admin shell
-                            </div>
-                        )}
-                        <div className="border border-border bg-[#f8f8f6] px-3 py-3">
-                            <ClientSwitcher variant="sidebar" />
-                        </div>
-                    </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <nav className="flex-1 space-y-1 px-3 py-4">
                 {isPvsAdmin && (
