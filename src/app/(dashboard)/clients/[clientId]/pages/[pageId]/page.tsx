@@ -2,19 +2,9 @@
 
 import Link from 'next/link'
 import { use, useRef, useState } from 'react'
-import { ArrowLeft, CheckCircle2, FileText, Save } from 'lucide-react'
+import { ArrowLeft, Layers3, LayoutTemplate, Link2, PanelRight, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
-import {
-    DynamicForm,
-    type DynamicFormHandle,
-} from '@/components/dynamic-form'
+import { DynamicForm, type DynamicFormHandle } from '@/components/dynamic-form'
 import type { CmsTemplate } from '@/types/cms-template'
 
 const demoTemplate: CmsTemplate = {
@@ -76,160 +66,118 @@ const demoValues = {
     legacy_embed: '<iframe src="https://example.com"></iframe>',
 }
 
+const demoRoute = '/about'
+
+function MetaPill({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+    return (
+        <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-white/80 px-3 py-1.5 text-sm text-muted-foreground shadow-[0_12px_24px_-24px_rgba(15,23,42,0.35)]">
+            <span className="text-primary">{icon}</span>
+            <span>{children}</span>
+        </div>
+    )
+}
+
+function formatEditableSummary(totalFields: number, editableFields: number) {
+    const lockedFields = Math.max(totalFields - editableFields, 0)
+
+    if (lockedFields === 0) {
+        return `${editableFields} editable fields`
+    }
+
+    return `${editableFields} editable · ${lockedFields} locked`
+}
+
 export default function ClientPageDetailPage({
     params,
 }: {
-    params: Promise<{ clientId: string, pageId: string }>
+    params: Promise<{ clientId: string; pageId: string }>
 }) {
-    const { clientId, pageId } = use(params)
+    const { clientId } = use(params)
     const formRef = useRef<DynamicFormHandle>(null)
     const [isDirty, setIsDirty] = useState(false)
-    const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
     const [isSaving, setIsSaving] = useState(false)
+
+    const editableFieldCount = demoTemplate.fields.filter((field) => field.type !== 'iframe').length
+    const pageUrl = `https://www.pixelversestudios.io${demoRoute}`
 
     const handleSubmit = async () => {
         setIsSaving(true)
         await new Promise((resolve) => setTimeout(resolve, 350))
-        setLastSavedAt(new Date().toLocaleTimeString([], {
-            hour: 'numeric',
-            minute: '2-digit',
-        }))
         setIsSaving(false)
     }
 
     return (
-        <div className="space-y-6 p-6 md:p-8">
+        <div className="space-y-6 bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_22%,#ffffff_100%)] p-6 md:p-8">
             <Button
                 variant="ghost"
-                render={
-                    <Link href={`/clients/${clientId}/pages`} />
-                }
+                render={<Link href={`/clients/${clientId}/pages`} />}
                 className="gap-2"
             >
                 <ArrowLeft className="size-4" />
                 Back to pages
             </Button>
 
-            <section className="rounded-[1.2rem] border border-border/80 bg-white shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
-                <div className="grid gap-6 px-6 py-6 md:px-8 md:py-7 lg:grid-cols-[minmax(0,1fr)_260px]">
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-[#f7f7fb] px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-primary">
-                            <FileText className="size-3.5" />
-                            Rich text editor demo
+            <div className="flex flex-col gap-5 rounded-xl border border-border/70 bg-white/92 p-5 shadow-[0_18px_34px_-34px_rgba(17,17,17,0.18)] backdrop-blur md:p-6">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="max-w-3xl space-y-3">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-[#f7f7fb] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                            <LayoutTemplate className="size-3.5" />
+                            Page editor
                         </div>
-                        <div className="space-y-2">
-                            <h1 className="text-[2.2rem] font-semibold tracking-[-0.06em] text-foreground md:text-[3rem]">
-                                Dynamic template-driven editor
+                        <div className="space-y-3">
+                            <h1 className="text-[1.9rem] font-semibold tracking-[-0.06em] text-foreground md:text-[2.6rem]">
+                                {demoTemplate.label}
                             </h1>
-                            <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-[0.95rem]">
-                                This route now demonstrates the shared renderer
-                                for `DEV-705`, driven entirely by template field
-                                definitions instead of hardcoded form inputs.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 rounded-[1rem] border border-border/70 bg-[#fcfcfe] p-4">
-                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                            Demo context
-                        </p>
-                        <div className="space-y-2 text-sm text-muted-foreground">
-                            <p>
-                                <span className="font-medium text-foreground">Page ID:</span>{' '}
-                                {pageId}
-                            </p>
-                            <p>
-                                <span className="font-medium text-foreground">Paste mode:</span>{' '}
-                                plain text
-                            </p>
-                            <p>
-                                <span className="font-medium text-foreground">Template fields:</span>{' '}
-                                {demoTemplate.fields.length}
-                            </p>
+                            <a
+                                href={pageUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex w-fit items-center gap-2 rounded-full border border-border/70 bg-white/85 px-3.5 py-2 text-sm text-muted-foreground shadow-[0_14px_30px_-28px_rgba(15,23,42,0.32)] transition hover:border-primary/25 hover:text-foreground"
+                            >
+                                <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#f6f4ff] text-primary">
+                                    <Link2 className="size-3.5" />
+                                </span>
+                                <span className="font-medium text-foreground">{pageUrl}</span>
+                            </a>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-                <Card className="rounded-[1.2rem] border border-border/80 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
-                    <CardHeader className="border-b border-border/70">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div>
-                                <CardTitle>Form renderer</CardTitle>
-                                <CardDescription>
-                                    Fields are rendered in template order with
-                                    validation and graceful unsupported-field fallbacks.
-                                </CardDescription>
-                            </div>
-                            <Button
-                                type="button"
-                                onClick={() => formRef.current?.submit()}
-                                disabled={!isDirty || isSaving}
-                                className="gap-2"
-                            >
-                                <Save className="size-4" />
-                                {isSaving ? 'Saving…' : 'Save changes'}
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="py-5">
-                        <DynamicForm
-                            ref={formRef}
-                            template={demoTemplate}
-                            initialValues={demoValues}
-                            onSubmit={handleSubmit}
-                            onDirtyChange={setIsDirty}
-                        />
-                    </CardContent>
-                </Card>
-
-                <Card className="rounded-[1.2rem] border border-border/80 shadow-[0_18px_48px_-44px_rgba(17,17,17,0.5)]">
-                    <CardHeader className="border-b border-border/70">
-                        <div className="mb-2 flex size-9 items-center justify-center rounded-[0.85rem] bg-primary/10 text-primary">
-                            <CheckCircle2 className="size-4.5" />
-                        </div>
-                        <CardTitle>Renderer state</CardTitle>
-                        <CardDescription>
-                            Quick proof that the parent can observe dirty state
-                            and trigger save without hardcoding individual fields.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 py-5">
-                        <div className="rounded-[1rem] border border-border/70 bg-[#fcfcfe] p-4">
-                            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                                Dirty state
-                            </p>
-                            <p className="mt-2 text-sm text-foreground">
-                                {isDirty ? 'Unsaved changes present' : 'Form matches initial values'}
-                            </p>
-                        </div>
-
-                        <div className="rounded-[1rem] border border-border/70 bg-[#fcfcfe] p-4">
-                            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                                Last saved
-                            </p>
-                            <p className="mt-2 text-sm text-foreground">
-                                {lastSavedAt ?? 'Not saved in this session'}
-                            </p>
-                        </div>
-
-                        <div className="rounded-[1rem] border border-dashed border-border/90 bg-[#fcfcfe] p-4">
-                            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                                Included in this demo
-                            </p>
-                            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                                <li>`text` with max length</li>
-                                <li>`textarea` with max length</li>
-                                <li>`rich_text` via Tiptap</li>
-                                <li>`boolean` with switch UI</li>
-                                <li>`image` placeholder</li>
-                                <li>unknown field warning</li>
-                            </ul>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="ml-auto flex flex-wrap items-center gap-2.5">
+                        <MetaPill icon={<PanelRight className="size-3.5" />}>
+                            {formatEditableSummary(demoTemplate.fields.length, editableFieldCount)}
+                        </MetaPill>
+                        <MetaPill icon={<Layers3 className="size-3.5" />}>
+                            {demoTemplate.fields.length} total fields
+                        </MetaPill>
+                    </div>
+                </div>
             </div>
+
+            <section className="space-y-6">
+                <div className="flex justify-end">
+                    <Button
+                        type="button"
+                        onClick={() => formRef.current?.submit()}
+                        disabled={!isDirty || isSaving}
+                        className="gap-2"
+                    >
+                        <Save className="size-4" />
+                        {isSaving ? 'Saving…' : 'Save changes'}
+                    </Button>
+                </div>
+
+                <div className="px-1">
+                    <DynamicForm
+                        ref={formRef}
+                        template={demoTemplate}
+                        initialValues={demoValues}
+                        onSubmit={handleSubmit}
+                        onDirtyChange={setIsDirty}
+                    />
+                </div>
+            </section>
         </div>
     )
 }

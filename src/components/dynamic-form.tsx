@@ -1,11 +1,6 @@
 'use client'
 
-import {
-    forwardRef,
-    useEffect,
-    useImperativeHandle,
-    useMemo,
-} from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import {
     Controller,
     FormProvider,
@@ -13,9 +8,9 @@ import {
     useFormContext,
     type DefaultValues,
     type FieldErrors,
+    type Resolver,
 } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod/v4'
 import { TriangleAlert, ImageIcon } from 'lucide-react'
 import { RichTextEditor } from '@/components/rich-text-editor'
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,6 +21,7 @@ import type { CmsTemplate, CmsTemplateField } from '@/types/cms-template'
 import { cn } from '@/lib/utils'
 
 type DynamicFormValues = Record<string, unknown>
+type DynamicFormSchema = ReturnType<typeof buildZodSchemaFromTemplate>
 
 export interface DynamicFormHandle {
     submit: () => void
@@ -53,16 +49,19 @@ const buildFieldSchema = (field: CmsTemplateField) => {
             }
 
             if (field.max_length) {
-                schema = schema.max(field.max_length, `Must be ${field.max_length} characters or less`)
+                schema = schema.max(
+                    field.max_length,
+                    `Must be ${field.max_length} characters or less`,
+                )
             }
 
-            return field.required ? schema : z.string().optional().default('')
+            return field.required ? schema : schema.optional().default('')
         }
         case 'boolean':
             return field.required
                 ? z.boolean({
-                    error: 'Required',
-                })
+                      error: 'Required',
+                  })
                 : z.boolean().optional()
         case 'image':
             return z.string().optional()
@@ -81,8 +80,38 @@ export const buildZodSchemaFromTemplate = (template: CmsTemplate) => {
     return z.object(shape)
 }
 
-const buildFieldId = (templateId: string, fieldKey: string) =>
-    `${templateId}-${fieldKey}`
+const dynamicFormResolver =
+    (schema: DynamicFormSchema): Resolver<DynamicFormValues> =>
+    async (values) => {
+        const result = await schema.safeParseAsync(values)
+
+        if (result.success) {
+            return {
+                values: result.data,
+                errors: {},
+            }
+        }
+
+        return {
+            values: {},
+            errors: result.error.issues.reduce<FieldErrors<DynamicFormValues>>((acc, issue) => {
+                const fieldKey = issue.path[0]
+
+                if (typeof fieldKey !== 'string') {
+                    return acc
+                }
+
+                acc[fieldKey] = {
+                    type: issue.code,
+                    message: issue.message,
+                }
+
+                return acc
+            }, {}),
+        }
+    }
+
+const buildFieldId = (templateId: string, fieldKey: string) => `${templateId}-${fieldKey}`
 
 const getDefaultValues = (
     template: CmsTemplate,
@@ -101,10 +130,22 @@ const getDefaultValues = (
     }, {})
 }
 
-const getFieldError = (
-    errors: FieldErrors<DynamicFormValues>,
-    key: string,
-) => {
+const getFormBaselineKey = (template: CmsTemplate, initialValues: Record<string, unknown>) => {
+    const fields = template.fields.map((field) => ({
+        key: field.key,
+        type: field.type,
+        required: !!field.required,
+        max_length: field.max_length ?? null,
+        value: initialValues[field.key] ?? null,
+    }))
+
+    return JSON.stringify({
+        templateId: template.id,
+        fields,
+    })
+}
+
+const getFieldError = (errors: FieldErrors<DynamicFormValues>, key: string) => {
     const error = errors[key]
     if (!error) return null
 
@@ -124,33 +165,20 @@ const FieldShell = ({
 }) => (
     <div className="space-y-2.5">
         <div className="space-y-1">
-            <label
-                htmlFor={htmlFor}
-                className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
                 {field.label}
-                {field.required ? (
-                    <span className="ml-1 text-destructive">*</span>
-                ) : null}
+                {field.required ? <span className="ml-1 text-destructive">*</span> : null}
             </label>
             {field.help ? (
-                <p className="text-sm leading-6 text-muted-foreground">
-                    {field.help}
-                </p>
+                <p className="text-sm leading-6 text-muted-foreground">{field.help}</p>
             ) : null}
         </div>
         {children}
-        {error ? (
-            <p className="text-sm text-destructive">{error}</p>
-        ) : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
 )
 
-const UnsupportedField = ({
-    field,
-}: {
-    field: CmsTemplateField
-}) => (
+const UnsupportedField = ({ field }: { field: CmsTemplateField }) => (
     <Card className="border border-amber-200 bg-amber-50/70 shadow-none">
         <CardContent className="flex items-start gap-3 px-4 py-4">
             <div className="rounded-[0.8rem] bg-amber-100 p-2 text-amber-700">
@@ -161,21 +189,15 @@ const UnsupportedField = ({
                     Unsupported field type: {field.type}
                 </p>
                 <p className="text-sm leading-6 text-muted-foreground">
-                    Contact your developer. This field will not crash the form,
-                    but it cannot be edited yet.
+                    Contact your developer. This field will not crash the form, but it cannot be
+                    edited yet.
                 </p>
             </div>
         </CardContent>
     </Card>
 )
 
-const ImagePlaceholderField = ({
-    field,
-    value,
-}: {
-    field: CmsTemplateField
-    value: string
-}) => (
+const ImagePlaceholderField = ({ field, value }: { field: CmsTemplateField; value: string }) => (
     <FieldShell field={field}>
         <div className="rounded-[1rem] border border-dashed border-border/90 bg-[#fbfbfd] p-4">
             <div className="flex items-start gap-3">
@@ -183,16 +205,12 @@ const ImagePlaceholderField = ({
                     <ImageIcon className="size-4" />
                 </div>
                 <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                        Image uploads coming soon
-                    </p>
+                    <p className="text-sm font-medium text-foreground">Image uploads coming soon</p>
                     <p className="text-sm leading-6 text-muted-foreground">
                         Tracked in the image-gallery milestone.
                     </p>
                     {value ? (
-                        <p className="break-all text-sm text-foreground">
-                            Current URL: {value}
-                        </p>
+                        <p className="break-all text-sm text-foreground">Current URL: {value}</p>
                     ) : null}
                 </div>
             </div>
@@ -221,12 +239,7 @@ const DynamicFormFields = ({
 
                 if (field.type === 'text') {
                     return (
-                        <FieldShell
-                            key={field.key}
-                            field={field}
-                            error={error}
-                            htmlFor={fieldId}
-                        >
+                        <FieldShell key={field.key} field={field} error={error} htmlFor={fieldId}>
                             <Input
                                 {...register(field.key)}
                                 id={fieldId}
@@ -239,12 +252,7 @@ const DynamicFormFields = ({
 
                 if (field.type === 'textarea') {
                     return (
-                        <FieldShell
-                            key={field.key}
-                            field={field}
-                            error={error}
-                            htmlFor={fieldId}
-                        >
+                        <FieldShell key={field.key} field={field} error={error} htmlFor={fieldId}>
                             <Textarea
                                 {...register(field.key)}
                                 id={fieldId}
@@ -262,15 +270,18 @@ const DynamicFormFields = ({
                             name={field.key}
                             control={control}
                             render={({ field: controllerField }) => (
-                                <FieldShell
-                                    field={field}
-                                    error={error}
-                                >
+                                <FieldShell field={field} error={error}>
                                     <RichTextEditor
-                                        value={typeof controllerField.value === 'string' ? controllerField.value : ''}
+                                        value={
+                                            typeof controllerField.value === 'string'
+                                                ? controllerField.value
+                                                : ''
+                                        }
                                         onChange={controllerField.onChange}
                                         disabled={disabled}
-                                        placeholder={field.help ?? `Write ${field.label.toLowerCase()}…`}
+                                        placeholder={
+                                            field.help ?? `Write ${field.label.toLowerCase()}…`
+                                        }
                                     />
                                 </FieldShell>
                             )}
@@ -285,10 +296,7 @@ const DynamicFormFields = ({
                             name={field.key}
                             control={control}
                             render={({ field: controllerField }) => (
-                                <FieldShell
-                                    field={field}
-                                    error={error}
-                                >
+                                <FieldShell field={field} error={error}>
                                     <div className="flex items-center justify-between rounded-[1rem] border border-border/80 bg-white px-4 py-3">
                                         <p className="text-sm text-muted-foreground">
                                             {controllerField.value ? 'Enabled' : 'Disabled'}
@@ -314,76 +322,72 @@ const DynamicFormFields = ({
                             render={({ field: controllerField }) => (
                                 <ImagePlaceholderField
                                     field={field}
-                                    value={typeof controllerField.value === 'string' ? controllerField.value : ''}
+                                    value={
+                                        typeof controllerField.value === 'string'
+                                            ? controllerField.value
+                                            : ''
+                                    }
                                 />
                             )}
                         />
                     )
                 }
 
-                return (
-                    <UnsupportedField
-                        key={field.key}
-                        field={field}
-                    />
-                )
+                return <UnsupportedField key={field.key} field={field} />
             })}
         </div>
     )
 }
 
-export const DynamicForm = forwardRef<DynamicFormHandle, DynamicFormProps>(
-    function DynamicForm(
-        {
-            template,
-            initialValues,
-            onSubmit,
-            onDirtyChange,
-            disabled = false,
-        },
+export const DynamicForm = forwardRef<DynamicFormHandle, DynamicFormProps>(function DynamicForm(
+    { template, initialValues, onSubmit, onDirtyChange, disabled = false },
+    ref,
+) {
+    const defaultValues = getDefaultValues(template, initialValues)
+    const baselineKey = getFormBaselineKey(template, initialValues)
+    const latestDefaultValuesRef = useRef(defaultValues)
+    const schema = useMemo(() => buildZodSchemaFromTemplate(template), [template])
+    const resolver = useMemo(() => dynamicFormResolver(schema), [schema])
+
+    const methods = useForm<DynamicFormValues>({
+        resolver,
+        defaultValues,
+        mode: 'onBlur',
+    })
+
+    useImperativeHandle(
         ref,
-    ) {
-        const schema = useMemo(() => buildZodSchemaFromTemplate(template), [template])
-        const defaultValues = useMemo(
-            () => getDefaultValues(template, initialValues),
-            [initialValues, template],
-        )
-
-        const methods = useForm<DynamicFormValues>({
-            resolver: zodResolver(schema),
-            defaultValues,
-            mode: 'onBlur',
-        })
-
-        useImperativeHandle(ref, () => ({
+        () => ({
             submit: () => {
                 void methods.handleSubmit(async (values) => {
                     await onSubmit(values)
                     methods.reset(values)
                 })()
             },
-        }), [methods, onSubmit])
+        }),
+        [methods, onSubmit],
+    )
 
-        useEffect(() => {
-            methods.reset(defaultValues)
-        }, [defaultValues, methods])
+    useEffect(() => {
+        latestDefaultValuesRef.current = defaultValues
+    }, [defaultValues])
 
-        useEffect(() => {
-            onDirtyChange?.(methods.formState.isDirty)
-        }, [methods.formState.isDirty, onDirtyChange])
+    useEffect(() => {
+        methods.reset(latestDefaultValuesRef.current)
+    }, [baselineKey, methods])
 
-        return (
-            <FormProvider {...methods}>
-                <form
-                    className={cn('space-y-6', disabled && 'opacity-80')}
-                    onSubmit={methods.handleSubmit(onSubmit)}
-                >
-                    <DynamicFormFields
-                        template={template}
-                        disabled={disabled}
-                    />
-                </form>
-            </FormProvider>
-        )
-    },
-)
+    useEffect(() => {
+        onDirtyChange?.(methods.formState.isDirty)
+    }, [methods.formState.isDirty, onDirtyChange])
+
+    return (
+        <FormProvider {...methods}>
+            <form
+                className={cn('space-y-6', disabled && 'opacity-80')}
+                onSubmit={methods.handleSubmit(onSubmit)}
+            >
+                <DynamicFormFields template={template} disabled={disabled} />
+            </form>
+        </FormProvider>
+    )
+})
