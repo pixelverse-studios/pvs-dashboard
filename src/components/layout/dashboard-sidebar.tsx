@@ -8,6 +8,7 @@ import {
     FileText,
     LayoutTemplate,
     LogOut,
+    Palette,
     PanelsTopLeft,
     Sparkles,
     Users,
@@ -40,6 +41,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { label: 'Pages', href: (clientId) => `/clients/${clientId}/pages`, icon: FileText },
+    {
+        label: 'Elements',
+        href: () => '/component-polish',
+        icon: Palette,
+        adminOnly: true,
+    },
     {
         label: 'Templates',
         href: (clientId) => `/clients/${clientId}/templates`,
