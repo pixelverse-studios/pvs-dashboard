@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { Command, Globe2, ShieldCheck, TriangleAlert } from 'lucide-react'
 import { useAuth } from '@/providers/auth-provider'
 import { useBranding } from '@/providers/branding-provider'
 import { signInWithGoogle } from '@/lib/auth-service'
@@ -18,14 +19,28 @@ const isValidLogoUrl = (url: string) => {
     }
 }
 
+function CommandStrip({ label, status }: { label: string; status: string }) {
+    return (
+        <div className="flex items-center justify-between gap-4 border-b border-border bg-white/90 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <Command className="size-4" />
+                </div>
+                <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground">{status}</p>
+                </div>
+            </div>
+            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-[58%] rounded-full bg-primary" />
+            </div>
+        </div>
+    )
+}
+
 export default function LoginPage() {
     const router = useRouter()
-    const {
-        isAuthenticated,
-        hasAnyAccess,
-        isLoadingSession,
-        isLoadingMe,
-    } = useAuth()
+    const { isAuthenticated, hasAnyAccess, isLoadingSession, isLoadingMe } = useAuth()
     const { website, isResolved, shouldResolveHostname } = useBranding()
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -44,9 +59,7 @@ export default function LoginPage() {
 
     const clientName =
         website?.client.company_name ||
-        [website?.client.firstname, website?.client.lastname]
-            .filter(Boolean)
-            .join(' ') ||
+        [website?.client.firstname, website?.client.lastname].filter(Boolean).join(' ') ||
         website?.website_title ||
         'PixelVerse Studios'
 
@@ -59,88 +72,111 @@ export default function LoginPage() {
             await signInWithGoogle()
         } catch (err) {
             setIsSigningIn(false)
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Sign-in failed. Please try again.',
-            )
+            setError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
         }
     }
 
     return (
-        <div className="w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="mb-8 lg:hidden">
-                <div className="mb-6 flex justify-center">
-                    <div className="inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-                        <span className="text-lg font-bold text-primary">
-                            P
-                        </span>
+        <div className="w-full max-w-[880px] animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <div className="grid overflow-hidden border border-border bg-white lg:grid-cols-[minmax(0,0.58fr)_minmax(320px,0.42fr)]">
+                <section className="border-b border-border lg:border-b-0 lg:border-r">
+                    <CommandStrip label="PVS CMS" status="Secure dashboard access" />
+
+                    <div className="space-y-8 px-5 py-7 md:px-8 md:py-9">
+                        <div className="space-y-5">
+                            {logoUrl && isValidLogoUrl(logoUrl) ? (
+                                <div className="h-12">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={logoUrl}
+                                        alt={`${clientName} logo`}
+                                        className="h-full w-auto max-w-full object-contain"
+                                    />
+                                </div>
+                            ) : (
+                                <Image
+                                    src="/pvs-logo.svg"
+                                    alt="PixelVerse Studios"
+                                    width={150}
+                                    height={30}
+                                    priority
+                                />
+                            )}
+
+                            <div className="space-y-3">
+                                <div className="inline-flex items-center gap-2 border-l-2 border-primary pl-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                                    <ShieldCheck className="size-3.5 text-primary" />
+                                    Admin sign in
+                                </div>
+                                <h1 className="text-4xl font-semibold leading-[0.95] tracking-[-0.075em] text-foreground md:text-5xl">
+                                    Welcome back
+                                </h1>
+                                <p className="max-w-md text-sm leading-7 text-muted-foreground">
+                                    Sign in to manage the {clientName} CMS workspace.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Button
+                                onClick={handleSignIn}
+                                disabled={isSigningIn}
+                                variant="outline"
+                                size="lg"
+                                className="h-11 w-full cursor-pointer gap-3 rounded-none border-border bg-white shadow-none hover:border-primary/30 hover:bg-muted/35"
+                            >
+                                <GoogleIcon className="size-5" />
+                                {isSigningIn ? 'Redirecting' : 'Sign in with Google'}
+                            </Button>
+
+                            {error ? (
+                                <div className="border-l-2 border-destructive bg-destructive/6 px-4 py-3 text-sm font-medium text-destructive">
+                                    {error}
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
-                </div>
-            </div>
+                </section>
 
-            <div className="mb-8 text-center lg:text-left">
-                {logoUrl && isValidLogoUrl(logoUrl) ? (
-                    <div className="mb-6 h-10 lg:text-left">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={logoUrl}
-                            alt={`${clientName} logo`}
-                            className="mx-auto h-full w-auto
-                                object-contain lg:mx-0"
-                        />
+                <aside className="bg-[#f8f8f6] px-5 py-6 md:px-6">
+                    <div className="space-y-4">
+                        <div className="border-l-2 border-primary bg-primary/4 px-4 py-3">
+                            <p className="text-sm font-semibold text-foreground">Workspace</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{clientName}</p>
+                        </div>
+
+                        <div className="border border-border bg-white px-4 py-4">
+                            <div className="flex items-start gap-3">
+                                <Globe2 className="mt-0.5 size-4 text-primary" />
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">
+                                        Branded client context
+                                    </p>
+                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                        This sign-in resolves the workspace from the current domain.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {shouldResolveHostname && website === null ? (
+                            <div className="border-l-2 border-warning bg-warning/8 px-4 py-3">
+                                <div className="flex items-start gap-3">
+                                    <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
+                                    <p className="text-sm leading-6 text-muted-foreground">
+                                        This domain is not configured yet. Contact PixelVerse
+                                        Studios if this looks wrong.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <p className="border-t border-border pt-4 text-xs text-muted-foreground">
+                            Secured by Google OAuth. Powered by PixelVerse Studios.
+                        </p>
                     </div>
-                ) : (
-                    <Image
-                        src="/pvs-logo.svg"
-                        alt="PixelVerse Studios"
-                        width={140}
-                        height={28}
-                        className="mx-auto mb-6 lg:mx-0"
-                        priority
-                    />
-                )}
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                    Welcome back
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                    Sign in to access the {clientName} dashboard.
-                </p>
+                </aside>
             </div>
-
-            <div className="space-y-4">
-                <Button
-                    onClick={handleSignIn}
-                    disabled={isSigningIn}
-                    variant="outline"
-                    className="group h-12 w-full cursor-pointer rounded-xl text-sm font-medium shadow-md ring-1 ring-border transition-all hover:-translate-y-1 hover:shadow-lg hover:ring-primary/20"
-                    size="lg"
-                >
-                    <GoogleIcon className="mr-3 size-5 transition-transform group-hover:scale-110" />
-                    {isSigningIn
-                        ? 'Redirecting...'
-                        : 'Sign in with Google'}
-                </Button>
-
-                {error && (
-                    <div className="animate-in fade-in slide-in-from-top-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
-                        {error}
-                    </div>
-                )}
-            </div>
-
-            {shouldResolveHostname && website === null && (
-                <div className="mt-6 rounded-lg border border-warning/20 bg-warning/5 px-4 py-3 text-center text-xs text-muted-foreground">
-                    This dashboard isn&apos;t configured for your
-                    domain yet. Contact PixelVerse Studios if you
-                    believe this is an error.
-                </div>
-            )}
-
-            <p className="mt-8 text-center text-xs text-muted-foreground/60">
-                Secured by Google OAuth &middot; Powered by
-                PixelVerse Studios
-            </p>
         </div>
     )
 }
